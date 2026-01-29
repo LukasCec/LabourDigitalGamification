@@ -342,6 +342,20 @@ function App() {
     resetGame()
   }, [resetGame])
 
+  // Control body overflow based on game state
+  useEffect(() => {
+    if (gameState === 'playing') {
+      document.body.classList.add('game-active')
+    } else {
+      document.body.classList.remove('game-active')
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('game-active')
+    }
+  }, [gameState])
+
   // Render character selection
   if (gameState === 'select') {
     return <CharacterSelect onSelect={handleCharacterSelect} />
