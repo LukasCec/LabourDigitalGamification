@@ -46,8 +46,8 @@ export const BENEFITS = [
     points: 55
   },
   {
-    id: 'death',
-    name: 'Death Benefit',
+    id: 'survivor',
+    name: 'Survivor Assistance',
     icon: '🕊️',
     shortDesc: 'Survivor support',
     description: 'Financial assistance for bereaved families',
@@ -58,20 +58,27 @@ export const BENEFITS = [
 
 // Obstacles for Office environment
 export const OFFICE_OBSTACLES = [
-  { id: 'desk', icon: '🪑', name: 'Chair', damage: 1 },
-  { id: 'box', icon: '📦', name: 'Box', damage: 1 },
-  { id: 'printer', icon: '🖨️', name: 'Printer', damage: 1 },
-  { id: 'plant', icon: '🪴', name: 'Plant', damage: 1 },
-  { id: 'cabinet', icon: '🗄️', name: 'Cabinet', damage: 2 }
+  { id: 'desk', icon: '🪑', name: 'Office Chair', damage: 1, size: 'medium' },
+  { id: 'box', icon: '📦', name: 'Box', damage: 1, size: 'medium' },
+  { id: 'printer', icon: '🖨️', name: 'Printer', damage: 1, size: 'medium' },
+  { id: 'plant', icon: '🪴', name: 'Plant', damage: 1, size: 'small' },
+  { id: 'cabinet', icon: '🗄️', name: 'Filing Cabinet', damage: 2, size: 'large' },
+  { id: 'copier', icon: '🖨️', name: 'Copy Machine', damage: 2, size: 'large' },
+  { id: 'watercooler', icon: '🚰', name: 'Water Cooler', damage: 1, size: 'medium' },
+  { id: 'cart', icon: '🛒', name: 'Mail Cart', damage: 1, size: 'medium' }
 ]
 
 // Obstacles for Factory environment
 export const FACTORY_OBSTACLES = [
-  { id: 'barrel', icon: '🛢️', name: 'Barrel', damage: 1 },
-  { id: 'crate', icon: '📦', name: 'Crate', damage: 1 },
-  { id: 'forklift', icon: '🚜', name: 'Forklift', damage: 2 },
-  { id: 'hazard', icon: '⚠️', name: 'Hazard', damage: 2 },
-  { id: 'machinery', icon: '⚙️', name: 'Machinery', damage: 1 }
+  { id: 'barrel', icon: '🛢️', name: 'Barrel', damage: 1, size: 'medium' },
+  { id: 'crate', icon: '📦', name: 'Crate', damage: 1, size: 'medium' },
+  { id: 'forklift', icon: '🚜', name: 'Forklift', damage: 2, size: 'large' },
+  { id: 'forklift2', icon: '🏗️', name: 'Industrial Forklift', damage: 2, size: 'large' },
+  { id: 'pallet', icon: '🪵', name: 'Pallet Stack', damage: 1, size: 'medium' },
+  { id: 'hazard', icon: '⚠️', name: 'Hazard Zone', damage: 2, size: 'large' },
+  { id: 'machinery', icon: '⚙️', name: 'Machinery', damage: 1, size: 'medium' },
+  { id: 'oilspill', icon: '🛢️', name: 'Oil Spill', damage: 1, size: 'wide' },
+  { id: 'crane', icon: '🏗️', name: 'Crane Arm', damage: 2, size: 'large' }
 ]
 
 export function getRandomBenefit() {

@@ -13,7 +13,6 @@ import Benefit3D from './components/3d/Benefit3D'
 import CharacterSelect from './components/CharacterSelect'
 import MobileHUD from './components/MobileHUD'
 import GameOver from './components/GameOver'
-import LoadingScreen from './components/LoadingScreen'
 import BenefitNotification from './components/BenefitNotification'
 import DamageVignette from './components/DamageVignette'
 
@@ -107,7 +106,7 @@ function App() {
     gameStartTime.current = Date.now()
     lastSpawn.current = Date.now()
     lastSpeedIncrease.current = Date.now()
-    setSmoothLaneX(0) // Initialize to center lane
+    setSmoothLaneX(0)
   }
 
 
@@ -377,11 +376,14 @@ function App() {
 
   // Render 3D game
   return (
-    <div
+    <motion.div
       className="game-3d-container"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
     >
+
       {/* Benefit Notification - Top Center */}
       <BenefitNotification benefit={showBenefitNotification} />
 
@@ -420,6 +422,7 @@ function App() {
         }}
         dpr={[1, 2]} // Limit pixel ratio for mobile performance
       >
+
         <Suspense fallback={null}>
           {/* Game Scene (environment, lighting) */}
           <GameScene characterType={characterType} />
@@ -448,10 +451,7 @@ function App() {
           })}
         </Suspense>
       </Canvas>
-
-      {/* Loading screen */}
-      <LoadingScreen />
-    </div>
+    </motion.div>
   )
 }
 

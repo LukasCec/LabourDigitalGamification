@@ -40,6 +40,7 @@ export default function Benefit3D({ item, speed, onCollision }) {
     <group
       ref={groupRef}
       position={[item.position[0], item.position[1], item.position[2]]}
+      scale={2.0}
     >
       {/* Multiple rotating outer rings for visibility */}
       <mesh ref={ring1Ref}>

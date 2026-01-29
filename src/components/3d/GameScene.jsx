@@ -1,10 +1,6 @@
 import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import {
-  Environment,
-  ContactShadows,
-  Sky
-} from '@react-three/drei'
+import { ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
 export default function GameScene({ characterType }) {
@@ -73,25 +69,33 @@ export default function GameScene({ characterType }) {
 
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.5} />
+      {/* Background - solid color, no async loading */}
+      <color attach="background" args={[isOffice ? '#87CEEB' : '#1a1a2e']} />
+
+      {/* Fog for depth effect */}
+      <fog attach="fog" args={[isOffice ? '#87CEEB' : '#1a1a2e', 30, 100]} />
+
+      {/* Enhanced Lighting - replaces Environment */}
+      <ambientLight intensity={0.6} />
       <directionalLight
-        position={[10, 10, 5]}
-        intensity={1}
+        position={[10, 15, 5]}
+        intensity={1.2}
         castShadow
         shadow-mapSize={[1024, 1024]}
+        color={isOffice ? '#fff5e6' : '#ffffff'}
       />
-      <hemisphereLight intensity={0.3} groundColor="#444" />
-
-      {/* Sky/Background */}
-      {isOffice ? (
-        <Sky sunPosition={[100, 20, 100]} />
-      ) : (
-        <color attach="background" args={['#2a2a2a']} />
-      )}
-
-      {/* Environment map for reflections */}
-      <Environment preset={isOffice ? 'sunset' : 'warehouse'} />
+      <directionalLight
+        position={[-5, 10, -5]}
+        intensity={0.4}
+        color={isOffice ? '#ffe4c4' : '#4a6fa5'}
+      />
+      <hemisphereLight
+        intensity={0.5}
+        color={isOffice ? '#87CEEB' : '#4a6fa5'}
+        groundColor={isOffice ? '#8B4513' : '#1a1a2e'}
+      />
+      {/* Point light for extra fill */}
+      <pointLight position={[0, 5, 0]} intensity={0.3} color="#ffffff" />
 
       {/* Floor/Ground */}
       <mesh
