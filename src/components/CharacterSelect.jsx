@@ -38,7 +38,7 @@ export default function CharacterSelect({ onSelect }) {
   const currentChar = CHARACTER_TYPES[selectedCharacter.toUpperCase()]
 
   return (
-    <div className="character-select-modern">
+    <div className="character-select-modern ">
       {/* Background gradient overlay */}
       <div className="select-bg-overlay" />
 

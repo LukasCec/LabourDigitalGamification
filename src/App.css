@@ -10,33 +10,37 @@
 }
 
 html {
-  overflow: visible;
-  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow: visible;
   background: #000;
   user-select: none;
   -webkit-user-select: none;
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent scrolling during gameplay ONLY */
+/* ONLY block scrolling during active gameplay */
 body.game-active {
   overflow: hidden;
   position: fixed;
   width: 100%;
   height: 100vh;
+  touch-action: none;
 }
 
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
 }
 
 /* ===================================
@@ -63,17 +67,19 @@ body.game-active {
 }
 
 /* ===================================
-   CHARACTER SELECT - MODERN DARK MODE
+   CHARACTER SELECT - MODERN DARK MODE - SCROLLABLE
    =================================== */
 
 .character-select-modern {
   width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-  overflow-y: auto;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  overflow-y: scroll;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   position: relative;
-  padding-bottom: 50px;
 }
 
 .select-bg-overlay {
@@ -95,9 +101,9 @@ body.game-active {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  min-height: 100vh;
+  min-height: calc(100vh + 200px); /* Force content taller than viewport */
   padding: 15px;
-  padding-bottom: 100px;
+  padding-bottom: 150px; /* Large bottom padding to ensure scroll */
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -115,12 +121,12 @@ body.game-active {
     grid-template-columns: 45% 55%;
     gap: 40px;
     padding: 40px;
-    min-height: 100vh;
-    height: auto;
+    padding-bottom: 100px;
+    min-height: calc(100vh + 100px);
   }
 
   .character-select-modern {
-    overflow-y: auto;
+    overflow-y: scroll;
   }
 }
 
@@ -421,6 +427,8 @@ body.game-active {
     0 0 0 0 rgba(59, 130, 246, 0.5);
   position: relative;
   overflow: hidden;
+  margin-top: 20px;
+  margin-bottom: 50px; /* Extra space to ensure it's visible */
 }
 
 .start-button-modern::before {
@@ -1174,6 +1182,40 @@ body.game-active {
     rgba(220, 38, 38, 0.8) 70%,
     rgba(185, 28, 28, 0.95) 100%
   );
+}
+
+/* ===================================
+   MOBILE SCROLLING FIXES
+   =================================== */
+
+/* Ensure body can scroll when not in game */
+body:not(.game-active) {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  position: static !important;
+}
+
+/* Force scrolling on character select */
+.character-select-modern {
+  touch-action: pan-y !important;
+}
+
+/* Fallback for browsers that don't support dvh */
+@supports not (height: 100dvh) {
+  .character-select-modern {
+    height: 100vh;
+  }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+  .select-container {
+    padding-bottom: 200px !important; /* Extra padding for mobile */
+  }
+
+  .character-select-modern {
+    min-height: 100vh;
+  }
 }
 
 
