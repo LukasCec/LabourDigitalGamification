@@ -1,0 +1,590 @@
+/* ===================================
+   3D PLAYER CHARACTER STYLES
+   =================================== */
+
+.player-3d-container {
+  position: absolute;
+  bottom: 25%;
+  transform: translateX(-50%);
+  z-index: 10;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.player-3d {
+  position: relative;
+  width: 80px;
+  height: 140px;
+  transform-style: preserve-3d;
+}
+
+.character-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: translateZ(50px);
+}
+
+/* ===================================
+   HEAD (3D CUBE)
+   =================================== */
+
+.head {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+}
+
+.head > div {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+}
+
+.head-front {
+  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%);
+  transform: translateZ(25px);
+  border-radius: 10px;
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.5);
+}
+
+.head-back {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateZ(-25px) rotateY(180deg);
+  border-radius: 10px;
+}
+
+.head-left {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+  transform: rotateY(-90deg) translateZ(25px);
+  border-radius: 10px;
+}
+
+.head-right {
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+  transform: rotateY(90deg) translateZ(25px);
+  border-radius: 10px;
+}
+
+.head-top {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  transform: rotateX(90deg) translateZ(25px);
+  border-radius: 10px;
+}
+
+/* Face details */
+.face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.eyes {
+  display: flex;
+  gap: 15px;
+}
+
+.eye {
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.mouth {
+  width: 20px;
+  height: 8px;
+  border: 2px solid #7c2d12;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ===================================
+   HARDHAT (Factory Worker)
+   =================================== */
+
+.hardhat {
+  position: absolute;
+  width: 58px;
+  height: 30px;
+  top: -20px;
+  left: -4px;
+  transform-style: preserve-3d;
+}
+
+.hardhat > div {
+  position: absolute;
+}
+
+.hardhat-front {
+  width: 58px;
+  height: 30px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateZ(29px);
+  border-radius: 29px 29px 0 0;
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.4),
+    inset 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+.hardhat-back {
+  width: 58px;
+  height: 30px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  transform: translateZ(-29px) rotateY(180deg);
+  border-radius: 29px 29px 0 0;
+}
+
+.hardhat-left {
+  width: 58px;
+  height: 30px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: rotateY(-90deg) translateZ(29px);
+  border-radius: 29px 29px 0 0;
+}
+
+.hardhat-right {
+  width: 58px;
+  height: 30px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: rotateY(90deg) translateZ(29px);
+  border-radius: 29px 29px 0 0;
+}
+
+.hardhat-top {
+  width: 58px;
+  height: 58px;
+  background: radial-gradient(circle, #fde68a 0%, #fbbf24 100%);
+  transform: rotateX(90deg) translateZ(0);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+}
+
+/* ===================================
+   HAIR (Office Worker)
+   =================================== */
+
+.hair {
+  position: absolute;
+  width: 52px;
+  height: 25px;
+  top: -15px;
+  left: -1px;
+  transform-style: preserve-3d;
+}
+
+.hair > div {
+  position: absolute;
+}
+
+.hair-front {
+  width: 52px;
+  height: 25px;
+  background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+  transform: translateZ(26px);
+  border-radius: 26px 26px 0 0;
+}
+
+.hair-back {
+  width: 52px;
+  height: 25px;
+  background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+  transform: translateZ(-26px) rotateY(180deg);
+  border-radius: 26px 26px 0 0;
+}
+
+.hair-left {
+  width: 52px;
+  height: 25px;
+  background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+  transform: rotateY(-90deg) translateZ(26px);
+  border-radius: 26px 26px 0 0;
+}
+
+.hair-right {
+  width: 52px;
+  height: 25px;
+  background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+  transform: rotateY(90deg) translateZ(26px);
+  border-radius: 26px 26px 0 0;
+}
+
+.hair-top {
+  width: 52px;
+  height: 52px;
+  background: radial-gradient(circle, #78350f 0%, #451a03 100%);
+  transform: rotateX(90deg) translateZ(-12px);
+  border-radius: 50%;
+}
+
+/* ===================================
+   TORSO (3D BOX)
+   =================================== */
+
+.torso {
+  position: absolute;
+  width: 60px;
+  height: 50px;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+}
+
+.torso > div {
+  position: absolute;
+  width: 60px;
+  height: 50px;
+}
+
+.office .torso-front {
+  background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+  transform: translateZ(25px);
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.factory .torso-front {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  transform: translateZ(25px);
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.office .torso-back {
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  transform: translateZ(-25px) rotateY(180deg);
+  border-radius: 8px;
+}
+
+.factory .torso-back {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  transform: translateZ(-25px) rotateY(180deg);
+  border-radius: 8px;
+}
+
+.office .torso-left,
+.office .torso-right {
+  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+}
+
+.factory .torso-left,
+.factory .torso-right {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+}
+
+.torso-left {
+  transform: rotateY(-90deg) translateZ(25px);
+  border-radius: 8px;
+}
+
+.torso-right {
+  transform: rotateY(90deg) translateZ(25px);
+  border-radius: 8px;
+}
+
+/* Torso details */
+.tie {
+  position: absolute;
+  width: 12px;
+  height: 35px;
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  left: 50%;
+  top: 5px;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0%, 0% 15%, 0% 100%, 100% 100%, 100% 15%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.shirt-buttons {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+}
+
+.button {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.vest-stripe {
+  position: absolute;
+  width: 100%;
+  height: 15px;
+  top: 15px;
+  background: repeating-linear-gradient(
+    45deg,
+    #fef08a,
+    #fef08a 5px,
+    #f59e0b 5px,
+    #f59e0b 10px
+  );
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.safety-badge {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #fef08a;
+  border: 2px solid #f59e0b;
+  border-radius: 50%;
+  top: 5px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ===================================
+   ARMS (3D)
+   =================================== */
+
+.arm {
+  position: absolute;
+  top: 58px;
+  transform-style: preserve-3d;
+  transform-origin: top center;
+}
+
+.arm-left {
+  left: -5px;
+}
+
+.arm-right {
+  right: -5px;
+}
+
+.upper-arm {
+  position: relative;
+  width: 20px;
+  height: 30px;
+  transform-style: preserve-3d;
+}
+
+.arm-front,
+.arm-back,
+.arm-side {
+  position: absolute;
+  width: 20px;
+  height: 30px;
+}
+
+.office .arm-front {
+  background: linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%);
+  transform: translateZ(10px);
+  border-radius: 10px;
+}
+
+.factory .arm-front {
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  transform: translateZ(10px);
+  border-radius: 10px;
+}
+
+.arm-back {
+  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+  transform: translateZ(-10px) rotateY(180deg);
+  border-radius: 10px;
+}
+
+.factory .arm-back {
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+}
+
+.arm-side {
+  width: 20px;
+  height: 30px;
+  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+  transform: rotateY(90deg) translateZ(10px);
+  border-radius: 10px;
+}
+
+.factory .arm-side {
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+}
+
+.lower-arm {
+  position: relative;
+  width: 18px;
+  height: 25px;
+  top: 30px;
+  left: 1px;
+  transform-style: preserve-3d;
+}
+
+.forearm-front,
+.forearm-back {
+  position: absolute;
+  width: 18px;
+  height: 25px;
+}
+
+.forearm-front {
+  background: linear-gradient(180deg, #fde68a 0%, #fbbf24 100%);
+  transform: translateZ(9px);
+  border-radius: 9px;
+}
+
+.forearm-back {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateZ(-9px) rotateY(180deg);
+  border-radius: 9px;
+}
+
+.hand {
+  position: absolute;
+  width: 20px;
+  height: 18px;
+  background: radial-gradient(ellipse, #fde68a 0%, #fbbf24 100%);
+  border-radius: 50%;
+  top: 53px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ===================================
+   LEGS (3D)
+   =================================== */
+
+.leg {
+  position: absolute;
+  top: 100px;
+  transform-style: preserve-3d;
+  transform-origin: top center;
+}
+
+.leg-left {
+  left: 18px;
+}
+
+.leg-right {
+  right: 18px;
+}
+
+.upper-leg {
+  position: relative;
+  width: 22px;
+  height: 30px;
+  transform-style: preserve-3d;
+}
+
+.leg-front,
+.leg-back,
+.leg-side {
+  position: absolute;
+  width: 22px;
+  height: 30px;
+}
+
+.office .leg-front {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  transform: translateZ(11px);
+  border-radius: 11px;
+}
+
+.factory .leg-front {
+  background: linear-gradient(180deg, #92400e 0%, #78350f 100%);
+  transform: translateZ(11px);
+  border-radius: 11px;
+}
+
+.leg-back {
+  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+  transform: translateZ(-11px) rotateY(180deg);
+  border-radius: 11px;
+}
+
+.factory .leg-back {
+  background: linear-gradient(180deg, #78350f 0%, #451a03 100%);
+}
+
+.leg-side {
+  width: 22px;
+  height: 30px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  transform: rotateY(90deg) translateZ(11px);
+  border-radius: 11px;
+}
+
+.factory .leg-side {
+  background: linear-gradient(180deg, #92400e 0%, #78350f 100%);
+}
+
+.lower-leg {
+  position: relative;
+  width: 20px;
+  height: 28px;
+  top: 30px;
+  left: 1px;
+  transform-style: preserve-3d;
+}
+
+.shin-front,
+.shin-back {
+  position: absolute;
+  width: 20px;
+  height: 28px;
+}
+
+.shin-front {
+  background: linear-gradient(180deg, #fde68a 0%, #fbbf24 100%);
+  transform: translateZ(10px);
+  border-radius: 10px;
+}
+
+.shin-back {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateZ(-10px) rotateY(180deg);
+  border-radius: 10px;
+}
+
+.foot {
+  position: absolute;
+  width: 28px;
+  height: 12px;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-radius: 14px 14px 5px 5px;
+  top: 56px;
+  left: -4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.factory .foot {
+  background: linear-gradient(135deg, #78350f 0%, #451a03 100%);
+}
+
+/* ===================================
+   SHADOW
+   =================================== */
+
+.character-shadow {
+  position: absolute;
+  width: 100px;
+  height: 40px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(8px);
+}
+
