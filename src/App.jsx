@@ -27,7 +27,8 @@ const GAME_CONFIG = {
   BASE_SPEED: 0.08,
   MAX_SPEED: 0.25,
   SPEED_INCREASE_INTERVAL: 8000, // Increase every 8 seconds
-  SPAWN_INTERVAL: 1800, // Spawn every 1.8 seconds
+  SPAWN_INTERVAL: 1200, // Spawn every 1.2 seconds (more frequent obstacles)
+  BENEFIT_DISTANCE_INTERVAL: 100, // Spawn benefit every 100 meters
 }
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
   // Player state
   const [playerLane, setPlayerLane] = useState(1) // 0 = left, 1 = center, 2 = right
   const [smoothLaneX, setSmoothLaneX] = useState(0) // Smooth interpolated X position
+  const [smoothJumpY, setSmoothJumpY] = useState(0) // Smooth interpolated Y position for jump
   const [isJumping, setIsJumping] = useState(false)
   const [isDucking, setIsDucking] = useState(false)
   const [isDamaged, setIsDamaged] = useState(false) // Red flash on damage
@@ -59,9 +61,61 @@ function App() {
   const nextItemId = useRef(0)
   const lastSpawn = useRef(0)
   const lastSpeedIncrease = useRef(0)
+  const lastBenefitDistance = useRef(0) // Track distance when last benefit was spawned
   const gameStartTime = useRef(null)
   const touchStartX = useRef(null)
   const touchStartY = useRef(null)
+  const dashSoundRef = useRef(null)
+  const jumpSoundRef = useRef(null)
+  const hurtSoundRef = useRef(null)
+  const collectSoundRef = useRef(null)
+
+  // Initialize sounds
+  useEffect(() => {
+    dashSoundRef.current = new Audio('/sounds/dash_sound.wav')
+    dashSoundRef.current.volume = 0.5
+
+    jumpSoundRef.current = new Audio('/sounds/jump_sound.wav')
+    jumpSoundRef.current.volume = 0.5
+
+    hurtSoundRef.current = new Audio('/sounds/hurt_sound.wav')
+    hurtSoundRef.current.volume = 0.6
+
+    collectSoundRef.current = new Audio('/sounds/collect_sound.wav')
+    collectSoundRef.current.volume = 0.5
+  }, [])
+
+  // Play dash sound function
+  const playDashSound = useCallback(() => {
+    if (dashSoundRef.current) {
+      dashSoundRef.current.currentTime = 0
+      dashSoundRef.current.play().catch(() => {}) // Ignore errors if sound can't play
+    }
+  }, [])
+
+  // Play jump sound function
+  const playJumpSound = useCallback(() => {
+    if (jumpSoundRef.current) {
+      jumpSoundRef.current.currentTime = 0
+      jumpSoundRef.current.play().catch(() => {})
+    }
+  }, [])
+
+  // Play hurt sound function
+  const playHurtSound = useCallback(() => {
+    if (hurtSoundRef.current) {
+      hurtSoundRef.current.currentTime = 0
+      hurtSoundRef.current.play().catch(() => {})
+    }
+  }, [])
+
+  // Play collect sound function
+  const playCollectSound = useCallback(() => {
+    if (collectSoundRef.current) {
+      collectSoundRef.current.currentTime = 0
+      collectSoundRef.current.play().catch(() => {})
+    }
+  }, [])
 
   // Get lane X position in 3D space
   const getLanePosition = useCallback((lane) => {
@@ -99,6 +153,70 @@ function App() {
     }
   }, [gameState, playerLane, getLanePosition])
 
+  // Refs for physics-based jump
+  const jumpVelocityRef = useRef(0)
+  const isInAirRef = useRef(false)
+  const currentJumpYRef = useRef(0)
+  const jumpRequestedRef = useRef(false) // Track if jump was requested
+
+  // Handle jump request - when isJumping becomes true, set the request flag
+  useEffect(() => {
+    if (isJumping) {
+      jumpRequestedRef.current = true
+    }
+  }, [isJumping])
+
+  // Physics-based jump - realistic parabolic arc
+  useEffect(() => {
+    if (gameState !== 'playing') return
+
+    let animationFrameId
+    let lastTime = performance.now()
+
+    const GRAVITY = 22 // Gravity acceleration
+    const JUMP_VELOCITY = 11 // Initial upward velocity (higher = higher jump)
+
+    const updateJump = (currentTime) => {
+      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.05) // Cap delta to avoid huge jumps
+      lastTime = currentTime
+
+      // Check if jump was requested and player is on ground
+      if (jumpRequestedRef.current && !isInAirRef.current && currentJumpYRef.current <= 0.01) {
+        jumpVelocityRef.current = JUMP_VELOCITY
+        isInAirRef.current = true
+        jumpRequestedRef.current = false // Clear the request
+      }
+
+      // If in air, apply physics
+      if (isInAirRef.current) {
+        // Apply velocity
+        currentJumpYRef.current += jumpVelocityRef.current * deltaTime
+
+        // Apply gravity to velocity
+        jumpVelocityRef.current -= GRAVITY * deltaTime
+
+        // Check if landed
+        if (currentJumpYRef.current <= 0) {
+          currentJumpYRef.current = 0
+          jumpVelocityRef.current = 0
+          isInAirRef.current = false
+        }
+
+        setSmoothJumpY(currentJumpYRef.current)
+      }
+
+      animationFrameId = requestAnimationFrame(updateJump)
+    }
+
+    animationFrameId = requestAnimationFrame(updateJump)
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [gameState])
+
   // Character selection
   const handleCharacterSelect = (type) => {
     setCharacterType(type)
@@ -107,6 +225,7 @@ function App() {
     lastSpawn.current = Date.now()
     lastSpeedIncrease.current = Date.now()
     setSmoothLaneX(0)
+    setSmoothJumpY(0)
   }
 
 
@@ -131,6 +250,7 @@ function App() {
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       // Horizontal swipe - change lanes
       if (Math.abs(deltaX) > threshold) {
+        playDashSound() // Play dash sound on lane change
         if (deltaX > 0) {
           setPlayerLane(prev => Math.min(2, prev + 1))
         } else {
@@ -140,11 +260,14 @@ function App() {
     } else {
       // Vertical swipe
       if (Math.abs(deltaY) > threshold) {
-        if (deltaY < 0 && !isJumping && !isDucking) {
+        // Allow jump only when player is on the ground
+        const isOnGround = !isInAirRef.current && currentJumpYRef.current < 0.1
+        if (deltaY < 0 && isOnGround && !isDucking) {
           // Swipe up - jump
+          playJumpSound() // Play jump sound
           setIsJumping(true)
-          setTimeout(() => setIsJumping(false), 600)
-        } else if (deltaY > 0 && !isDucking && !isJumping) {
+          setTimeout(() => setIsJumping(false), 50) // Short pulse, physics handles the rest
+        } else if (deltaY > 0 && !isDucking && isOnGround) {
           // Swipe down - duck
           setIsDucking(true)
           setTimeout(() => setIsDucking(false), 500)
@@ -154,7 +277,7 @@ function App() {
 
     touchStartX.current = null
     touchStartY.current = null
-  }, [isJumping, isDucking])
+  }, [isDucking, playDashSound, playJumpSound])
 
   // Keyboard controls (for testing on desktop)
   useEffect(() => {
@@ -162,16 +285,21 @@ function App() {
 
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') {
+        playDashSound() // Play dash sound on lane change
         setPlayerLane(prev => Math.max(0, prev - 1))
       } else if (e.key === 'ArrowRight') {
+        playDashSound() // Play dash sound on lane change
         setPlayerLane(prev => Math.min(2, prev + 1))
       } else if (e.key === 'ArrowUp' || e.key === ' ') {
-        if (!isJumping && !isDucking) {
+        const isOnGround = !isInAirRef.current && currentJumpYRef.current < 0.1
+        if (isOnGround && !isDucking) {
+          playJumpSound() // Play jump sound
           setIsJumping(true)
-          setTimeout(() => setIsJumping(false), 600)
+          setTimeout(() => setIsJumping(false), 50)
         }
       } else if (e.key === 'ArrowDown') {
-        if (!isDucking && !isJumping) {
+        const isOnGround = !isInAirRef.current && currentJumpYRef.current < 0.1
+        if (!isDucking && isOnGround) {
           setIsDucking(true)
           setTimeout(() => setIsDucking(false), 500)
         }
@@ -180,66 +308,96 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [gameState, isJumping, isDucking])
+  }, [gameState, isDucking, playDashSound, playJumpSound])
 
   // Spawn items (benefits and obstacles)
   const spawnItem = useCallback(() => {
-    const isBenefit = Math.random() < 0.35 // 35% benefits, 65% obstacles
-    const lane = Math.floor(Math.random() * GAME_CONFIG.LANES)
+    // Benefits spawn only every 200 meters
+    const shouldSpawnBenefit = distance - lastBenefitDistance.current >= GAME_CONFIG.BENEFIT_DISTANCE_INTERVAL
 
-    const itemId = nextItemId.current++
-    let newItem
+    const newItems = []
 
-    if (isBenefit) {
+    if (shouldSpawnBenefit) {
+      lastBenefitDistance.current = distance // Update last benefit distance
+      const lane = Math.floor(Math.random() * GAME_CONFIG.LANES)
+      const itemId = nextItemId.current++
       const benefit = getRandomBenefit()
-      newItem = {
+      newItems.push({
         id: itemId,
         uniqueKey: `benefit-${itemId}`,
         type: 'benefit',
         lane,
-        position: [getLanePosition(lane), 0.5, -80], // [x, y, z] - Spawned further away
+        position: [getLanePosition(lane), 0.5, -80],
         processed: false,
-        ...benefit
-      }
+        avoided: false,
+        benefitId: benefit.id,
+        name: benefit.name,
+        icon: benefit.icon,
+        shortDesc: benefit.shortDesc,
+        description: benefit.description,
+        color: benefit.color,
+        points: benefit.points
+      })
     } else {
-      const obstacle = getRandomObstacle(characterType)
-      newItem = {
-        id: itemId,
-        uniqueKey: `obstacle-${itemId}`,
-        type: 'obstacle',
-        lane,
-        position: [getLanePosition(lane), 0, -80], // Spawned further away
-        processed: false,
-        ...obstacle
+      // Determine how many obstacles to spawn (1 or 2, with 40% chance for 2)
+      const spawnDouble = Math.random() < 0.4
+      const numObstacles = spawnDouble ? 2 : 1
+
+      // Get available lanes and shuffle them
+      const availableLanes = [0, 1, 2]
+      for (let i = availableLanes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableLanes[i], availableLanes[j]] = [availableLanes[j], availableLanes[i]]
+      }
+
+      // Spawn obstacles on different lanes
+      for (let i = 0; i < numObstacles; i++) {
+        const lane = availableLanes[i]
+        const itemId = nextItemId.current++
+        const obstacle = getRandomObstacle(characterType)
+        newItems.push({
+          id: itemId,
+          uniqueKey: `obstacle-${itemId}`,
+          type: 'obstacle',
+          lane,
+          position: [getLanePosition(lane), 0, -80],
+          processed: false,
+          avoided: false,
+          obstacleId: obstacle.id,
+          name: obstacle.name,
+          icon: obstacle.icon,
+          damage: obstacle.damage,
+          size: obstacle.size
+        })
       }
     }
 
-    setItems(prev => [...prev, newItem])
-  }, [characterType, getLanePosition])
+    setItems(prev => [...prev, ...newItems])
+  }, [characterType, getLanePosition, distance])
 
   // Collision detection - only triggers once per item
   const checkCollision = useCallback((item, itemZ) => {
-    // Remove items that passed the player (far behind)
-    if (itemZ > 5) {
+    // Remove items that passed the player (far behind - increased to 20 so disappearing is not visible)
+    if (itemZ > 20) {
       setItems(prev => prev.filter(i => i.id !== item.id))
       return true
     }
 
     // Check if item is in collision zone (tight zone near player)
     if (itemZ > -1 && itemZ < 1.5) {
-      // Check if item already processed
-      if (item.processed) return false
-
-      // Mark as processed
-      item.processed = true
+      // Check if item already processed or avoided (use state, not direct mutation)
+      if (item.processed || item.avoided) return false
 
       if (item.lane === playerLane) {
         if (item.type === 'benefit') {
+          // Play collect sound
+          playCollectSound()
+
           // Collect benefit - use benefit's actual ID (e.g., 'legal', 'strike')
           setScore(prev => prev + item.points)
           setBenefitsCollected(prev => prev + 1)
-          // Store the benefit type ID, not the item ID
-          setCollectedBenefitIds(prev => [...new Set([...prev, item.id])])
+          // Store the benefit type ID (benefitId), not the item's unique ID
+          setCollectedBenefitIds(prev => [...new Set([...prev, item.benefitId])])
 
           // Show benefit notification
           setShowBenefitNotification({
@@ -249,11 +407,19 @@ function App() {
           })
           setTimeout(() => setShowBenefitNotification(null), 3000) // Hide after 3 seconds
 
+          // Remove only this specific item by its unique ID
           setItems(prev => prev.filter(i => i.id !== item.id))
           return true
         } else {
-          // Hit obstacle - check if jumping/ducking
-          if (!isJumping && !isDucking) {
+          // Hit obstacle - check if jumping high enough or ducking
+          // Unjumpable obstacles ALWAYS deal damage - cannot be avoided by jumping
+          const isUnjumpable = item.size === 'unjumpable'
+          const isHighEnough = smoothJumpY > 1.0
+
+          if (isUnjumpable || (!isHighEnough && !isDucking)) {
+            // Play hurt sound
+            playHurtSound()
+
             // Damage flash effect on player
             setIsDamaged(true)
             setTimeout(() => setIsDamaged(false), 500)
@@ -269,25 +435,24 @@ function App() {
               }
               return newLives
             })
+            // Remove only this specific item by its unique ID
             setItems(prev => prev.filter(i => i.id !== item.id))
             return true
           } else {
-            // Successfully avoided by jumping/ducking
+            // Successfully avoided by jumping/ducking - add points
+            // Mark as avoided in state to prevent re-processing
             setScore(prev => prev + 10)
-            setItems(prev => prev.filter(i => i.id !== item.id))
-            return true
+            setItems(prev => prev.map(i =>
+              i.id === item.id ? { ...i, avoided: true } : i
+            ))
+            return false // Don't remove, let it pass
           }
         }
-      } else {
-        // Item in different lane - no collision, remove it
-        setTimeout(() => {
-          setItems(prev => prev.filter(i => i.id !== item.id))
-        }, 500)
       }
     }
 
     return false
-  }, [playerLane, isJumping, isDucking])
+  }, [playerLane, smoothJumpY, isDucking, playHurtSound, playCollectSound])
 
   // Game loop
   useEffect(() => {
@@ -296,8 +461,8 @@ function App() {
     const gameLoop = setInterval(() => {
       const now = Date.now()
 
-      // Update distance
-      setDistance(prev => prev + speed * 100)
+      // Update distance (slower increment)
+      setDistance(prev => prev + speed * 10)
 
       // Spawn items
       if (now - lastSpawn.current > GAME_CONFIG.SPAWN_INTERVAL) {
@@ -332,6 +497,7 @@ function App() {
     nextItemId.current = 0
     lastSpawn.current = Date.now()
     lastSpeedIncrease.current = Date.now()
+    lastBenefitDistance.current = 0 // Reset benefit distance tracker
     gameStartTime.current = Date.now()
   }, [])
 
@@ -430,7 +596,7 @@ function App() {
           {/* Player */}
           <Player3DModel
             characterType={characterType}
-            position={[smoothLaneX, isJumping ? 2 : isDucking ? -0.5 : 0, 0]}
+            position={[smoothLaneX, isDucking ? -0.5 : smoothJumpY, 0]}
             isJumping={isJumping}
             isDucking={isDucking}
             isDamaged={isDamaged}

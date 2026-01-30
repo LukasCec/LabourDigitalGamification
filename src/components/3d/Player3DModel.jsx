@@ -59,13 +59,27 @@ export default function Player3DModel({
       })
     }
 
-    if (isRunning && !isJumping && !isDucking) {
-      // Arm swing
+    // Check if player is in the air based on actual Y position
+    const isInAir = position[1] > 0.1
+
+    // Smooth interpolation factor for arm animations
+    const lerpFactor = 0.12 // How fast arms move (0.1 = slow, 0.3 = fast)
+
+    // Helper function for smooth interpolation
+    const lerp = (current, target, factor) => current + (target - current) * factor
+
+    if (isRunning && !isInAir && !isDucking) {
+      // Arm swing - normal running (smoothly transition back from jump pose)
+      const targetLeftArmX = Math.sin(time.current) * 0.5
+      const targetRightArmX = Math.sin(time.current + Math.PI) * 0.5
+
       if (leftArmRef.current) {
-        leftArmRef.current.rotation.x = Math.sin(time.current) * 0.5
+        leftArmRef.current.rotation.x = lerp(leftArmRef.current.rotation.x, targetLeftArmX, lerpFactor)
+        leftArmRef.current.rotation.z = lerp(leftArmRef.current.rotation.z, 0, lerpFactor)
       }
       if (rightArmRef.current) {
-        rightArmRef.current.rotation.x = Math.sin(time.current + Math.PI) * 0.5
+        rightArmRef.current.rotation.x = lerp(rightArmRef.current.rotation.x, targetRightArmX, lerpFactor)
+        rightArmRef.current.rotation.z = lerp(rightArmRef.current.rotation.z, 0, lerpFactor)
       }
 
       // Leg movement
@@ -79,6 +93,26 @@ export default function Player3DModel({
       // Head bob (subtle)
       if (headRef.current) {
         headRef.current.position.y = 1.6 + Math.sin(time.current * 2) * 0.05
+      }
+    } else if (isInAir) {
+      // Jump animation - arms raised up smoothly
+      const targetArmX = -2.8 // Arms up (pointing up/back)
+
+      if (leftArmRef.current) {
+        leftArmRef.current.rotation.x = lerp(leftArmRef.current.rotation.x, targetArmX, lerpFactor)
+        leftArmRef.current.rotation.z = lerp(leftArmRef.current.rotation.z, 0.3, lerpFactor)
+      }
+      if (rightArmRef.current) {
+        rightArmRef.current.rotation.x = lerp(rightArmRef.current.rotation.x, targetArmX, lerpFactor)
+        rightArmRef.current.rotation.z = lerp(rightArmRef.current.rotation.z, -0.3, lerpFactor)
+      }
+
+      // Legs tucked slightly during jump
+      if (leftLegRef.current) {
+        leftLegRef.current.rotation.x = lerp(leftLegRef.current.rotation.x, -0.3, lerpFactor)
+      }
+      if (rightLegRef.current) {
+        rightLegRef.current.rotation.x = lerp(rightLegRef.current.rotation.x, -0.3, lerpFactor)
       }
     }
 

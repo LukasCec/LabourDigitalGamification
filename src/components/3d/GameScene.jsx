@@ -4,7 +4,9 @@ import { ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
 export default function GameScene({ characterType }) {
-  const floorRef = useRef()
+  const floorRef1 = useRef()
+  const floorRef2 = useRef()
+  const floorRef3 = useRef()
   const isOffice = characterType === 'office'
 
   // Track environment objects for dynamic generation
@@ -18,17 +20,26 @@ export default function GameScene({ characterType }) {
   const nextLeftId = useRef(200)
   const nextRightId = useRef(300)
 
+  const FLOOR_LENGTH = 100
+  const FLOOR_RESET_THRESHOLD = 80 // Increased so floor disappears further behind camera
+  const FLOOR_RESET_POSITION = -150
+
   // Animate floor and environment objects moving towards camera
   useFrame((state, delta) => {
     const moveSpeed = delta * 16 // Faster movement
 
-    // Move floor
-    if (floorRef.current) {
-      floorRef.current.position.z += moveSpeed
-      if (floorRef.current.position.z > 20) {
-        floorRef.current.position.z = -20
+    // Move floor tiles - creates infinite scrolling effect
+    const floors = [floorRef1.current, floorRef2.current, floorRef3.current]
+    floors.forEach(floor => {
+      if (floor) {
+        floor.position.z += moveSpeed
+        if (floor.position.z > FLOOR_RESET_THRESHOLD) {
+          // Find the furthest floor position
+          const furthestZ = Math.min(...floors.filter(f => f !== floor).map(f => f.position.z))
+          floor.position.z = furthestZ - FLOOR_LENGTH
+        }
       }
-    }
+    })
 
     // Move left side objects
     setLeftObjects(prev => {
@@ -97,11 +108,49 @@ export default function GameScene({ characterType }) {
       {/* Point light for extra fill */}
       <pointLight position={[0, 5, 0]} intensity={0.3} color="#ffffff" />
 
-      {/* Floor/Ground */}
+      {/* Floor/Ground - 3 tiles for seamless infinite scrolling */}
       <mesh
-        ref={floorRef}
+        ref={floorRef1}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.5, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[20, 100]} />
+        <meshStandardMaterial
+          color={isOffice ? '#cbd5e1' : '#52525b'}
+          roughness={0.8}
+          metalness={0.2}
+        >
+          <primitive
+            attach="map"
+            object={createGridTexture(isOffice)}
+          />
+        </meshStandardMaterial>
+      </mesh>
+
+      <mesh
+        ref={floorRef2}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.5, -100]}
+        receiveShadow
+      >
+        <planeGeometry args={[20, 100]} />
+        <meshStandardMaterial
+          color={isOffice ? '#cbd5e1' : '#52525b'}
+          roughness={0.8}
+          metalness={0.2}
+        >
+          <primitive
+            attach="map"
+            object={createGridTexture(isOffice)}
+          />
+        </meshStandardMaterial>
+      </mesh>
+
+      <mesh
+        ref={floorRef3}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.5, -200]}
         receiveShadow
       >
         <planeGeometry args={[20, 100]} />
@@ -139,8 +188,19 @@ export default function GameScene({ characterType }) {
   )
 }
 
-// Create grid texture for floor
+// Cache for floor textures
+const textureCache = {
+  office: null,
+  factory: null
+}
+
+// Create grid texture for floor (with caching)
 function createGridTexture(isOffice) {
+  const cacheKey = isOffice ? 'office' : 'factory'
+  if (textureCache[cacheKey]) {
+    return textureCache[cacheKey]
+  }
+
   const canvas = document.createElement('canvas')
   canvas.width = 512
   canvas.height = 512
@@ -171,6 +231,7 @@ function createGridTexture(isOffice) {
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(4, 20)
 
+  textureCache[cacheKey] = texture
   return texture
 }
 

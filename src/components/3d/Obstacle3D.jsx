@@ -794,6 +794,128 @@ export default function Obstacle3D({ item, speed, onCollision }) {
           </group>
         )
 
+      case '🚧': // Unjumpable obstacles - Partition Wall (office) or Security Gate (factory)
+        // Check if it's office partition or factory gate based on the item name
+        if (item.name === 'Partition Wall') {
+          // Office Partition Wall - glass/metal partition (narrow, single lane)
+          return (
+            <group>
+              {/* Main frame - metal structure */}
+              <mesh position={[0, 0.7, 0]} castShadow>
+                <boxGeometry args={[1.0, 1.4, 0.15]} />
+                <meshStandardMaterial color="#64748b" metalness={0.7} roughness={0.3} />
+              </mesh>
+              {/* Glass panels */}
+              <mesh position={[0, 0.8, 0.02]}>
+                <boxGeometry args={[0.85, 1.0, 0.05]} />
+                <meshStandardMaterial
+                  color="#93c5fd"
+                  transparent
+                  opacity={0.4}
+                  metalness={0.9}
+                  roughness={0.1}
+                />
+              </mesh>
+              {/* Top bar */}
+              <mesh position={[0, 1.4, 0]} castShadow>
+                <boxGeometry args={[1.1, 0.08, 0.18]} />
+                <meshStandardMaterial color="#475569" metalness={0.8} />
+              </mesh>
+              {/* Bottom bar */}
+              <mesh position={[0, 0.08, 0]} castShadow>
+                <boxGeometry args={[1.1, 0.16, 0.18]} />
+                <meshStandardMaterial color="#475569" metalness={0.8} />
+              </mesh>
+              {/* Side posts */}
+              {[-0.45, 0.45].map((x, i) => (
+                <mesh key={i} position={[x, 0.7, 0]} castShadow>
+                  <boxGeometry args={[0.08, 1.4, 0.18]} />
+                  <meshStandardMaterial color="#334155" metalness={0.8} />
+                </mesh>
+              ))}
+              {/* Warning sign */}
+              <mesh position={[0, 1.1, 0.1]}>
+                <boxGeometry args={[0.4, 0.2, 0.02]} />
+                <meshStandardMaterial color="#fef08a" />
+              </mesh>
+              {/* Warning stripes on sign */}
+              {[-0.12, 0, 0.12].map((x, i) => (
+                <mesh key={i} position={[x, 1.1, 0.12]}>
+                  <boxGeometry args={[0.05, 0.16, 0.01]} />
+                  <meshStandardMaterial color="#dc2626" />
+                </mesh>
+              ))}
+              {/* Warning lights on top */}
+              {[-0.25, 0.25].map((x, i) => (
+                <mesh key={i} position={[x, 1.48, 0]}>
+                  <sphereGeometry args={[0.06, 8, 8]} />
+                  <meshStandardMaterial
+                    color="#ef4444"
+                    emissive="#ef4444"
+                    emissiveIntensity={1.0}
+                  />
+                </mesh>
+              ))}
+            </group>
+          )
+        } else {
+          // Factory Security Gate - industrial roller door/gate (narrow, single lane)
+          return (
+            <group>
+              {/* Main gate frame */}
+              <mesh position={[0, 0.7, 0]} castShadow>
+                <boxGeometry args={[1.1, 1.5, 0.25]} />
+                <meshStandardMaterial color="#78716c" metalness={0.6} roughness={0.4} />
+              </mesh>
+              {/* Horizontal roller slats */}
+              {Array.from({ length: 6 }).map((_, i) => (
+                <mesh key={i} position={[0, 0.15 + i * 0.22, 0.14]} castShadow>
+                  <boxGeometry args={[0.95, 0.18, 0.04]} />
+                  <meshStandardMaterial
+                    color={i % 2 === 0 ? '#a8a29e' : '#78716c'}
+                    metalness={0.7}
+                    roughness={0.3}
+                  />
+                </mesh>
+              ))}
+              {/* Side pillars */}
+              {[-0.6, 0.6].map((x, i) => (
+                <mesh key={i} position={[x, 0.7, 0]} castShadow>
+                  <boxGeometry args={[0.12, 1.6, 0.3]} />
+                  <meshStandardMaterial color="#57534e" metalness={0.7} />
+                </mesh>
+              ))}
+              {/* Top housing for roller mechanism */}
+              <mesh position={[0, 1.5, 0]} castShadow>
+                <boxGeometry args={[1.2, 0.15, 0.35]} />
+                <meshStandardMaterial color="#44403c" metalness={0.6} />
+              </mesh>
+              {/* Warning stripes - yellow/black */}
+              <mesh position={[0, 0.7, 0.14]}>
+                <boxGeometry args={[0.95, 0.3, 0.02]} />
+                <meshStandardMaterial color="#fef08a" />
+              </mesh>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <mesh key={i} position={[-0.35 + i * 0.19, 0.7, 0.15]}>
+                  <boxGeometry args={[0.09, 0.3, 0.01]} />
+                  <meshStandardMaterial color="#1f2937" />
+                </mesh>
+              ))}
+              {/* Warning lights on posts */}
+              {[-0.6, 0.6].map((x, i) => (
+                <mesh key={i} position={[x, 1.55, 0.12]}>
+                  <cylinderGeometry args={[0.06, 0.06, 0.1, 8]} />
+                  <meshStandardMaterial
+                    color="#f59e0b"
+                    emissive="#f59e0b"
+                    emissiveIntensity={1.0}
+                  />
+                </mesh>
+              ))}
+            </group>
+          )
+        }
+
       default:
         // Generic warning obstacle - striped barrier
         return (
@@ -838,6 +960,7 @@ export default function Obstacle3D({ item, speed, onCollision }) {
       case 'medium': return 2.0
       case 'large': return 2.5
       case 'wide': return [2.5, 1.0, 2.5]
+      case 'unjumpable': return 2.5 // Large scale for unjumpable obstacles
       default: return 2.0
     }
   }

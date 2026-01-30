@@ -65,7 +65,8 @@ export const OFFICE_OBSTACLES = [
   { id: 'cabinet', icon: '🗄️', name: 'Filing Cabinet', damage: 2, size: 'large' },
   { id: 'copier', icon: '🖨️', name: 'Copy Machine', damage: 2, size: 'large' },
   { id: 'watercooler', icon: '🚰', name: 'Water Cooler', damage: 1, size: 'medium' },
-  { id: 'cart', icon: '🛒', name: 'Mail Cart', damage: 1, size: 'medium' }
+  { id: 'cart', icon: '🛒', name: 'Mail Cart', damage: 1, size: 'medium' },
+  { id: 'partition', icon: '🚧', name: 'Partition Wall', damage: 1, size: 'unjumpable' }
 ]
 
 // Obstacles for Factory environment
@@ -78,7 +79,8 @@ export const FACTORY_OBSTACLES = [
   { id: 'hazard', icon: '⚠️', name: 'Hazard Zone', damage: 2, size: 'large' },
   { id: 'machinery', icon: '⚙️', name: 'Machinery', damage: 1, size: 'medium' },
   { id: 'oilspill', icon: '🛢️', name: 'Oil Spill', damage: 1, size: 'wide' },
-  { id: 'crane', icon: '🏗️', name: 'Crane Arm', damage: 2, size: 'large' }
+  { id: 'crane', icon: '🏗️', name: 'Crane Arm', damage: 2, size: 'large' },
+  { id: 'securitygate', icon: '🚧', name: 'Security Gate', damage: 1, size: 'unjumpable' }
 ]
 
 export function getRandomBenefit() {
