@@ -1,3 +1,4 @@
+import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
