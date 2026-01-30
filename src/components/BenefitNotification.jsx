@@ -20,27 +20,16 @@ export default function BenefitNotification({ benefit, onComplete }) {
 
   // Get translated benefit name
   const getBenefitName = () => {
-    const translations = {
-      en: {
-        legal: 'Legal Protection',
-        strike: 'Strike Assistance',
-        accident: 'Accident Insurance',
-        emergency: 'Emergency Aid',
-        disciplinary: 'Disciplinary Protection',
-        survivor: 'Survivor Assistance'
-      },
-      de: {
-        legal: 'Rechtsschutz',
-        strike: 'Streikunterstützung',
-        accident: 'Unfallversicherung',
-        emergency: 'Notfallhilfe',
-        disciplinary: 'Disziplinarschutz',
-        survivor: 'Hinterbliebenenunterstützung'
-      }
+    const benefitKeyMap = {
+      legal: 'legal',
+      strike: 'strike',
+      accident: 'accident',
+      emergency: 'emergency',
+      disciplinary: 'disciplinary',
+      survivor: 'survivor'
     }
-    // Try to find by benefit id or return original name
-    const id = benefit.id || benefit.name?.toLowerCase().replace(/\s+/g, '')
-    return translations[language][id] || benefit.name
+    const key = benefitKeyMap[benefit.benefitId] || benefit.benefitId
+    return t(key) || benefit.name
   }
 
   return (

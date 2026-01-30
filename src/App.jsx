@@ -660,6 +660,7 @@ function App() {
       playCollectSound && playCollectSound();
       setShowBenefitNotification && setShowBenefitNotification(item);
       setBenefitsCollected && setBenefitsCollected(prev => prev + 1);
+      setScore && setScore(prev => prev + item.points);
       setCollectedBenefitIds && setCollectedBenefitIds(prev => prev.includes(item.benefitId) ? prev : [...prev, item.benefitId]);
       setItems && setItems(prev => prev.filter(i => i.uniqueKey !== item.uniqueKey));
     } else {
@@ -683,7 +684,7 @@ function App() {
       });
       setItems && setItems(prev => prev.filter(i => i.uniqueKey !== item.uniqueKey));
     }
-  }, [playerLane, smoothJumpY, isInvincible, setIsDamaged, setIsInvincible, setLives, setIsExploding, setGameState, setShowBenefitNotification, setBenefitsCollected, setCollectedBenefitIds, playHurtSound, playCollectSound, setItems]);
+  }, [playerLane, smoothJumpY, isInvincible, setIsDamaged, setIsInvincible, setLives, setIsExploding, setGameState, setShowBenefitNotification, setBenefitsCollected, setScore, setCollectedBenefitIds, playHurtSound, playCollectSound, setItems]);
 
   // Clear benefit notification callback
   const clearBenefitNotification = useCallback(() => {
