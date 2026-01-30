@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text } from '@react-three/drei'
 
 export default function Benefit3D({ item, speed, onCollision }) {
   const groupRef = useRef()
@@ -88,18 +87,27 @@ export default function Benefit3D({ item, speed, onCollision }) {
         />
       </mesh>
 
-      {/* Icon text - larger and bolder */}
-      <Text
-        position={[0, 0, 0.55]}
-        fontSize={0.5}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.05}
-        outlineColor="#000000"
-      >
-        {item.icon}
-      </Text>
+      {/* Inner core - bright center instead of text */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.25, 16, 16]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={1.5}
+        />
+      </mesh>
+
+      {/* Star shape indicator */}
+      <mesh rotation={[0, 0, Math.PI / 4]}>
+        <octahedronGeometry args={[0.35, 0]} />
+        <meshStandardMaterial
+          color={getBenefitColor()}
+          emissive={getBenefitColor()}
+          emissiveIntensity={1.0}
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
 
       {/* Strong point light for glow effect */}
       <pointLight

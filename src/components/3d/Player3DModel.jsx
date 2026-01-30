@@ -8,7 +8,8 @@ export default function Player3DModel({
   isJumping,
   isDucking,
   isDamaged,
-  isRunning
+  isRunning,
+  speed = 0.08
 }) {
   const groupRef = useRef()
   const bodyRef = useRef()
@@ -33,7 +34,9 @@ export default function Player3DModel({
 
   // Running animation
   useFrame((state, delta) => {
-    time.current += delta * 10
+    // Animation speed scales with game speed (faster running = faster limb movement)
+    const animationSpeed = 10 + (speed - 0.08) * 100 // Base 10, increases with speed
+    time.current += delta * animationSpeed
 
     // Apply damage flash effect to all meshes
     if (isDamaged && allMeshes.current.length > 0) {

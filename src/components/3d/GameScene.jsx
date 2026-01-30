@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
-export default function GameScene({ characterType }) {
+export default function GameScene({ characterType, speed = 0.08 }) {
   const floorRef1 = useRef()
   const floorRef2 = useRef()
   const floorRef3 = useRef()
@@ -37,7 +37,8 @@ export default function GameScene({ characterType }) {
 
   // Animate floor and environment objects moving towards camera
   useFrame((state, delta) => {
-    const moveSpeed = delta * 16 // Faster movement
+    // Speed multiplier based on game speed (scales with difficulty)
+    const moveSpeed = delta * speed * 200
 
     // Move floor tiles - creates infinite scrolling effect
     const floors = [floorRef1.current, floorRef2.current, floorRef3.current]

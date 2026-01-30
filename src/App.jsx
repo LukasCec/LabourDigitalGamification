@@ -26,8 +26,8 @@ const GAME_CONFIG = {
   LANE_WIDTH: 3,
   STARTING_LIVES: 3,
   BASE_SPEED: 0.08,
-  MAX_SPEED: 0.25,
-  SPEED_INCREASE_INTERVAL: 8000, // Increase every 8 seconds
+  MAX_SPEED: 0.30,
+  SPEED_INCREASE_INTERVAL: 5000, // Increase every 5 seconds
   SPAWN_INTERVAL: 1200, // Spawn every 1.2 seconds (more frequent obstacles)
   BENEFIT_DISTANCE_INTERVAL: 100, // Spawn benefit every 100 meters
 }
@@ -523,16 +523,20 @@ function App() {
       // Update distance (slower increment)
       setDistance(prev => prev + speed * 10)
 
-      // Spawn items
-      if (now - lastSpawn.current > GAME_CONFIG.SPAWN_INTERVAL) {
+      // Dynamic spawn interval - decreases as speed increases
+      // At base speed (0.08): 1200ms, at max speed (0.30): ~600ms
+      const dynamicSpawnInterval = Math.max(600, GAME_CONFIG.SPAWN_INTERVAL - (speed - 0.08) * 2500)
+
+      // Spawn items with dynamic interval
+      if (now - lastSpawn.current > dynamicSpawnInterval) {
         lastSpawn.current = now
         spawnItem()
       }
 
-      // Increase speed over time (slower increment)
+      // Increase speed over time (more noticeable increment)
       if (now - lastSpeedIncrease.current > GAME_CONFIG.SPEED_INCREASE_INTERVAL) {
         lastSpeedIncrease.current = now
-        setSpeed(prev => Math.min(GAME_CONFIG.MAX_SPEED, prev + 0.005))
+        setSpeed(prev => Math.min(GAME_CONFIG.MAX_SPEED, prev + 0.012))
       }
     }, 100)
 
@@ -696,7 +700,7 @@ function App() {
 
           <Suspense fallback={null}>
           {/* Game Scene (environment, lighting) */}
-          <GameScene characterType={characterType} />
+          <GameScene characterType={characterType} speed={isExploding ? 0 : speed} />
 
           {/* Player - hide when exploding */}
           {!isExploding && (
@@ -707,6 +711,7 @@ function App() {
               isDucking={isDucking}
               isDamaged={isDamaged}
               isRunning={true}
+              speed={speed}
             />
           )}
 
