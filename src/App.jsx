@@ -567,10 +567,30 @@ function App() {
   }, [])
 
   const goToMainMenu = useCallback(() => {
-    setGameState('select')
+    // Reset all game state first
+    setPlayerLane(1)
+    setSmoothLaneX(0)
+    setIsJumping(false)
+    setIsDucking(false)
+    setIsExploding(false)
+    setIsInvincible(false)
+    setScore(0)
+    setLives(GAME_CONFIG.STARTING_LIVES)
+    setDistance(0)
+    setSpeed(GAME_CONFIG.BASE_SPEED)
+    setBenefitsCollected(0)
+    setCollectedBenefitIds([])
+    setItems([])
+    nextItemId.current = 0
+    lastSpawn.current = Date.now()
+    lastSpeedIncrease.current = Date.now()
+    lastBenefitDistance.current = 0
+    gameStartTime.current = Date.now()
+
+    // Then set to select screen and clear character
     setCharacterType(null)
-    resetGame()
-  }, [resetGame])
+    setGameState('select')
+  }, [])
 
   // Control body overflow based on game state
   useEffect(() => {
