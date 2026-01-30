@@ -639,7 +639,8 @@ function App() {
 
   // Render 3D game
   return (
-    <>
+    <ErrorBoundary>
+      <>
       {AudioAndMute}
       {/* Bottom HUD Bar - Rendered outside game container for guaranteed visibility */}
       <div
@@ -718,6 +719,8 @@ function App() {
         >
 
           <Suspense fallback={null}>
+          {/* Debug log for Canvas mount */}
+          {console.log('Canvas mounted, gameState:', gameState)}
           {/* Game Scene (environment, lighting) */}
           <GameScene characterType={characterType} speed={isExploding ? 0 : speed} />
 
@@ -745,6 +748,8 @@ function App() {
           {/* Items (obstacles and benefits) - freeze when exploding */}
           {items.map(item => {
             const ItemComponent = item.type === 'benefit' ? Benefit3D : Obstacle3D
+            // Debug log for item spawn
+            console.log('Rendering item', item)
             return (
               <ItemComponent
                 key={item.uniqueKey || item.id}
@@ -776,8 +781,36 @@ function App() {
       </Canvas>
     </motion.div>
     </>
+    </ErrorBoundary>
   )
 }
 
 export default App
 
+// ErrorBoundary for catching runtime errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null, errorInfo: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, errorInfo) {
+    this.setState({ errorInfo })
+    // Log error to console for debugging
+    console.error('ErrorBoundary caught:', error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ color: 'white', background: '#1a1a2e', padding: 24, fontSize: 18 }}>
+          <h2>App Error</h2>
+          <pre>{this.state.error && this.state.error.toString()}</pre>
+          <pre style={{ fontSize: 14, color: '#f87171' }}>{this.state.errorInfo && this.state.errorInfo.componentStack}</pre>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
