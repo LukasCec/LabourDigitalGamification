@@ -639,8 +639,8 @@ function App() {
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          gap: '10px',
-          padding: '12px 10px',
+          gap: '20px',
+          padding: '12px 20px',
           paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
           background: 'rgba(0, 0, 0, 0.95)',
           borderTop: '2px solid rgba(255, 255, 255, 0.15)',
@@ -654,20 +654,6 @@ function App() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#ffffff' }}>
           <span style={{ fontSize: '1.5rem' }}>🤝</span>
           <span style={{ fontWeight: 800, color: '#ffffff' }}>{benefitsCollected}</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#ffffff', minWidth: '80px' }}>
-          <span style={{ fontSize: '1.5rem' }}>⚡</span>
-          <div style={{ width: '100%', height: '10px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '5px', overflow: 'hidden' }}>
-            <div
-              style={{
-                height: '100%',
-                width: `${Math.min((speed / 0.25) * 100, 100)}%`,
-                background: 'linear-gradient(90deg, #22c55e, #fbbf24, #f59e0b, #ef4444)',
-                borderRadius: '5px',
-                transition: 'width 0.3s ease'
-              }}
-            />
-          </div>
         </div>
       </div>
 

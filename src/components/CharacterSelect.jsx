@@ -240,6 +240,7 @@ export default function CharacterSelect({ onSelect }) {
             <Player3DModel
               characterType={selectedCharacter}
               position={[0, -0.5, 0]}
+              rotation={[0, Math.PI, 0]}
               isJumping={false}
               isDucking={false}
               isDamaged={false}

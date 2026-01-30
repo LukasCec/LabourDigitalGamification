@@ -5,6 +5,7 @@ import * as THREE from 'three'
 export default function Player3DModel({
   characterType,
   position,
+  rotation = [0, 0, 0],
   isJumping,
   isDucking,
   isDamaged,
@@ -126,7 +127,7 @@ export default function Player3DModel({
   })
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={position} rotation={rotation}>
       {/* Head - positioned on neck, rotated to face forward */}
       <group ref={headRef} position={[0, 1.6, 0]} rotation={[0, Math.PI, 0]}>
         <mesh
