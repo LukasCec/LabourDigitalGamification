@@ -606,6 +606,37 @@ function App() {
     }
   }, [gameState])
 
+  // === Background Music ===
+  const bgMusicRef = useRef(null)
+  const [musicStarted, setMusicStarted] = useState(false)
+
+  // Start music on first user interaction (for mobile autoplay policy)
+  useEffect(() => {
+    if (!musicStarted) {
+      const startMusic = () => {
+        try {
+          if (bgMusicRef.current) {
+            bgMusicRef.current.volume = 0.18
+            bgMusicRef.current.loop = true
+            bgMusicRef.current.play().catch(() => {})
+          }
+        } catch (e) {}
+        setMusicStarted(true)
+        window.removeEventListener('pointerdown', startMusic)
+        window.removeEventListener('touchstart', startMusic)
+        window.removeEventListener('keydown', startMusic)
+      }
+      window.addEventListener('pointerdown', startMusic)
+      window.addEventListener('touchstart', startMusic)
+      window.addEventListener('keydown', startMusic)
+      return () => {
+        window.removeEventListener('pointerdown', startMusic)
+        window.removeEventListener('touchstart', startMusic)
+        window.removeEventListener('keydown', startMusic)
+      }
+    }
+  }, [musicStarted])
+
   // Render character selection
   if (gameState === 'select') {
     return <CharacterSelect onSelect={handleCharacterSelect} />
@@ -628,6 +659,16 @@ function App() {
   // Render 3D game
   return (
     <>
+      {/* Global background music (looped, always present) */}
+      <audio
+        ref={bgMusicRef}
+        src={'/sounds/bg_music_sound.mp3'}
+        preload="auto"
+        autoPlay={false}
+        loop
+        style={{ display: 'none' }}
+      />
+
       {/* Bottom HUD Bar - Rendered outside game container for guaranteed visibility */}
       <div
         style={{
