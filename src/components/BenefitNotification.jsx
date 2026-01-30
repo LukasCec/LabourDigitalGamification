@@ -36,13 +36,12 @@ export default function BenefitNotification({ benefit, onComplete }) {
     <div
       style={{
         position: 'fixed',
-        bottom: 0,
+        bottom: '120px', // Position well above bottom bar
         left: 0,
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-end',
-        paddingBottom: '100px', // Position above bottom bar
         zIndex: 10000,
         pointerEvents: 'none'
       }}
