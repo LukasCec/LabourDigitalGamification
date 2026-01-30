@@ -478,7 +478,7 @@ function App() {
   const resetGame = useCallback(() => {
     setGameState('playing')
     setPlayerLane(1)
-    setSmoothLaneX(0) // Reset smooth position to center
+    setSmoothLaneX(0)
     setIsJumping(false)
     setIsDucking(false)
     setIsExploding(false) // Reset explosion state
@@ -490,6 +490,8 @@ function App() {
     setBenefitsCollected(0)
     setCollectedBenefitIds([])
     setItems([])
+    setFinishLineActive(false)
+    setFinishLineZ(null)
     nextItemId.current = 0
     lastSpawn.current = Date.now()
     lastSpeedIncrease.current = Date.now()
@@ -512,6 +514,8 @@ function App() {
     setBenefitsCollected(0)
     setCollectedBenefitIds([])
     setItems([])
+    setFinishLineActive(false)
+    setFinishLineZ(null)
     nextItemId.current = 0
     lastSpawn.current = Date.now()
     lastSpeedIncrease.current = Date.now()
@@ -751,7 +755,8 @@ function App() {
             )
           })}
 
-          {finishLineActive && finishLineZ !== null && (
+          {/* In Canvas, render checkered finish line only if finishLineActive and finishLineZ is a finite number */}
+          {finishLineActive && typeof finishLineZ === 'number' && Number.isFinite(finishLineZ) && (
             <group position={[0, 0.1, finishLineZ]}>
               {[...Array(10)].map((_, i) => (
                 <mesh key={'w'+i} position={[-4.5 + i, 0, 0]}>
