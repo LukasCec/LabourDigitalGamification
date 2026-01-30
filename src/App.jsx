@@ -600,6 +600,50 @@ function App() {
     />
   )
 
+  // === Collision detection function (must be inside App for state access) ===
+  const checkCollision = useCallback((item, itemZ) => {
+    // Získaj lane hráča a jeho výšku (Y)
+    const playerLaneVal = typeof playerLane === 'function' ? playerLane() : playerLane;
+    const playerY = typeof smoothJumpY === 'function' ? smoothJumpY() : smoothJumpY;
+    if (item.processed) return;
+    if (item.lane !== playerLaneVal) return;
+    let collisionZ = false;
+    if (item.type === 'benefit') {
+      if (Math.abs(itemZ) < 1.2 && playerY >= -0.1) collisionZ = true;
+    } else {
+      if (Math.abs(itemZ) < 1.1 && playerY < 0.3) collisionZ = true;
+    }
+    if (!collisionZ) return;
+    item.processed = true;
+    if (item.type === 'benefit') {
+      playCollectSound && playCollectSound();
+      setShowBenefitNotification && setShowBenefitNotification(item);
+      setBenefitsCollected && setBenefitsCollected(prev => prev + 1);
+      setCollectedBenefitIds && setCollectedBenefitIds(prev => prev.includes(item.benefitId) ? prev : [...prev, item.benefitId]);
+      setItems && setItems(prev => prev.filter(i => i.uniqueKey !== item.uniqueKey));
+    } else {
+      if (isInvincible) return;
+      playHurtSound && playHurtSound();
+      setIsDamaged && setIsDamaged(true);
+      setIsInvincible && setIsInvincible(true);
+      setTimeout(() => {
+        setIsDamaged && setIsDamaged(false);
+        setIsInvincible && setIsInvincible(false);
+      }, 1000);
+      setLives && setLives(prev => {
+        if (prev <= 1) {
+          setIsExploding && setIsExploding(true);
+          setTimeout(() => {
+            setGameState && setGameState('gameover');
+          }, 1200);
+          return 0;
+        }
+        return prev - 1;
+      });
+      setItems && setItems(prev => prev.filter(i => i.uniqueKey !== item.uniqueKey));
+    }
+  }, [playerLane, smoothJumpY, isInvincible, setIsDamaged, setIsInvincible, setLives, setIsExploding, setGameState, setShowBenefitNotification, setBenefitsCollected, setCollectedBenefitIds, playHurtSound, playCollectSound, setItems]);
+
   // Render character selection
   if (gameState === 'select') {
     return <>
@@ -786,8 +830,6 @@ function App() {
   )
 }
 
-export default App
-
 // ErrorBoundary for catching runtime errors
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -815,3 +857,5 @@ class ErrorBoundary extends React.Component {
     return this.props.children
   }
 }
+
+export default App
