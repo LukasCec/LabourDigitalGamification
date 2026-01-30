@@ -1,12 +1,15 @@
 import { motion } from 'framer-motion'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function MobileHUD({ score, lives }) {
+  const { t } = useLanguage()
+
   return (
     <div className="mobile-hud">
       {/* Top bar - Score and Lives */}
       <div className="hud-top-bar">
         <div className="hud-stat-group">
-          <div className="hud-label">Score</div>
+          <div className="hud-label">{t('score')}</div>
           <motion.div
             className="hud-value score"
             key={score}

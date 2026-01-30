@@ -3,26 +3,11 @@ import { motion } from 'framer-motion'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import Player3DModel from './3d/Player3DModel'
-
-const CHARACTER_TYPES = {
-  OFFICE: {
-    id: 'office',
-    title: 'Office Worker',
-    icon: '👔',
-    description: 'Office environment',
-    color: '#3b82f6'
-  },
-  FACTORY: {
-    id: 'factory',
-    title: 'Factory Worker',
-    icon: '⚙️',
-    description: 'Factory environment',
-    color: '#f59e0b'
-  }
-}
+import { useLanguage } from '../context/LanguageContext'
 
 export default function CharacterSelect({ onSelect }) {
   const [selectedCharacter, setSelectedCharacter] = useState('office')
+  const { language, setLanguage, t } = useLanguage()
 
   const handleSelect = (charId) => {
     setSelectedCharacter(charId)
@@ -31,8 +16,6 @@ export default function CharacterSelect({ onSelect }) {
   const handleStart = () => {
     onSelect(selectedCharacter)
   }
-
-  const currentChar = CHARACTER_TYPES[selectedCharacter.toUpperCase()]
 
   return (
     <div style={{
@@ -58,13 +41,86 @@ export default function CharacterSelect({ onSelect }) {
         pointerEvents: 'none'
       }} />
 
+      {/* Language Selector - Top Right */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        style={{
+          position: 'absolute',
+          top: 'calc(10px + env(safe-area-inset-top, 0px))',
+          right: '15px',
+          display: 'flex',
+          gap: '8px',
+          zIndex: 100
+        }}
+      >
+        {/* UK Flag Button */}
+        <motion.button
+          onClick={() => setLanguage('en')}
+          whileTap={{ scale: 0.9 }}
+          style={{
+            width: '44px',
+            height: '30px',
+            borderRadius: '6px',
+            border: language === 'en' ? '2px solid #22c55e' : '2px solid rgba(255,255,255,0.3)',
+            background: '#012169',
+            cursor: 'pointer',
+            padding: 0,
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: language === 'en' ? '0 0 12px rgba(34, 197, 94, 0.6)' : '0 2px 8px rgba(0,0,0,0.3)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {/* UK Flag Design */}
+          <div style={{ position: 'absolute', inset: 0, background: '#012169' }}>
+            {/* White diagonal stripes */}
+            <div style={{ position: 'absolute', top: '50%', left: '50%', width: '150%', height: '6px', background: '#fff', transform: 'translate(-50%, -50%) rotate(30deg)' }} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', width: '150%', height: '6px', background: '#fff', transform: 'translate(-50%, -50%) rotate(-30deg)' }} />
+            {/* Red diagonal stripes */}
+            <div style={{ position: 'absolute', top: '50%', left: '50%', width: '150%', height: '3px', background: '#C8102E', transform: 'translate(-50%, -50%) rotate(30deg)' }} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', width: '150%', height: '3px', background: '#C8102E', transform: 'translate(-50%, -50%) rotate(-30deg)' }} />
+            {/* White cross */}
+            <div style={{ position: 'absolute', top: 0, left: '50%', width: '8px', height: '100%', background: '#fff', transform: 'translateX(-50%)' }} />
+            <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '8px', background: '#fff', transform: 'translateY(-50%)' }} />
+            {/* Red cross */}
+            <div style={{ position: 'absolute', top: 0, left: '50%', width: '5px', height: '100%', background: '#C8102E', transform: 'translateX(-50%)' }} />
+            <div style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '5px', background: '#C8102E', transform: 'translateY(-50%)' }} />
+          </div>
+        </motion.button>
+
+        {/* German Flag Button */}
+        <motion.button
+          onClick={() => setLanguage('de')}
+          whileTap={{ scale: 0.9 }}
+          style={{
+            width: '44px',
+            height: '30px',
+            borderRadius: '6px',
+            border: language === 'de' ? '2px solid #22c55e' : '2px solid rgba(255,255,255,0.3)',
+            background: '#000',
+            cursor: 'pointer',
+            padding: 0,
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: language === 'de' ? '0 0 12px rgba(34, 197, 94, 0.6)' : '0 2px 8px rgba(0,0,0,0.3)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {/* German Flag - Black Red Gold horizontal stripes */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '33.33%', background: '#000000' }} />
+          <div style={{ position: 'absolute', top: '33.33%', left: 0, right: 0, height: '33.33%', background: '#DD0000' }} />
+          <div style={{ position: 'absolute', top: '66.66%', left: 0, right: 0, height: '33.34%', background: '#FFCC00' }} />
+        </motion.button>
+      </motion.div>
+
       {/* Title - Animated and exciting */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
           padding: '10px 15px',
-          paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(50px + env(safe-area-inset-top, 0px))',
           textAlign: 'center',
           zIndex: 10
         }}
@@ -111,7 +167,7 @@ export default function CharacterSelect({ onSelect }) {
               filter: 'drop-shadow(0 2px 10px rgba(59, 130, 246, 0.5))'
             }}
           >
-            <span>METALL</span>
+            <span>{t('title')}</span>
             <motion.span
               animate={{
                 color: ['#22c55e', '#3b82f6', '#8b5cf6', '#22c55e']
@@ -122,7 +178,7 @@ export default function CharacterSelect({ onSelect }) {
                 fontStyle: 'italic'
               }}
             >
-              RUSH
+              {t('titleAccent')}
             </motion.span>
           </motion.h1>
         </div>
@@ -147,7 +203,7 @@ export default function CharacterSelect({ onSelect }) {
           >
             ⚡
           </motion.span>
-          {' '}Run • Collect • Protect{' '}
+          {' '}{t('subtitle')}{' '}
           <motion.span
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity, delay: 1 }}
@@ -271,7 +327,7 @@ export default function CharacterSelect({ onSelect }) {
           fontSize: '0.9rem',
           marginTop: '10px',
           fontWeight: 600
-        }}>Tap to Play</p>
+        }}>{t('tapToPlay')}</p>
       </motion.div>
 
       {/* Character Selection Buttons */}
@@ -287,31 +343,50 @@ export default function CharacterSelect({ onSelect }) {
           zIndex: 10
         }}
       >
-        {Object.values(CHARACTER_TYPES).map((char) => (
-          <motion.button
-            key={char.id}
-            onClick={() => handleSelect(char.id)}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              padding: '12px 20px',
-              borderRadius: '12px',
-              border: selectedCharacter === char.id ? `3px solid ${char.color}` : '3px solid rgba(255,255,255,0.1)',
-              background: selectedCharacter === char.id ? `${char.color}22` : 'rgba(255,255,255,0.05)',
-              color: '#ffffff',
-              fontSize: 'clamp(0.85rem, 3vw, 1rem)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-              boxShadow: selectedCharacter === char.id ? `0 4px 20px ${char.color}44` : 'none'
-            }}
-          >
-            <span style={{ fontSize: '1.3em' }}>{char.icon}</span>
-            {char.title}
-          </motion.button>
-        ))}
+        <motion.button
+          onClick={() => handleSelect('office')}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            border: selectedCharacter === 'office' ? '3px solid #3b82f6' : '3px solid rgba(255,255,255,0.1)',
+            background: selectedCharacter === 'office' ? '#3b82f622' : 'rgba(255,255,255,0.05)',
+            color: '#ffffff',
+            fontSize: 'clamp(0.85rem, 3vw, 1rem)',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease',
+            boxShadow: selectedCharacter === 'office' ? '0 4px 20px #3b82f644' : 'none'
+          }}
+        >
+          <span style={{ fontSize: '1.3em' }}>👔</span>
+          {t('officeWorker')}
+        </motion.button>
+        <motion.button
+          onClick={() => handleSelect('factory')}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            border: selectedCharacter === 'factory' ? '3px solid #f59e0b' : '3px solid rgba(255,255,255,0.1)',
+            background: selectedCharacter === 'factory' ? '#f59e0b22' : 'rgba(255,255,255,0.05)',
+            color: '#ffffff',
+            fontSize: 'clamp(0.85rem, 3vw, 1rem)',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease',
+            boxShadow: selectedCharacter === 'factory' ? '0 4px 20px #f59e0b44' : 'none'
+          }}
+        >
+          <span style={{ fontSize: '1.3em' }}>⚙️</span>
+          {t('factoryWorker')}
+        </motion.button>
       </motion.div>
 
       {/* IG Metall Benefits Info - Styled with glow */}
@@ -354,18 +429,17 @@ export default function CharacterSelect({ onSelect }) {
             fontSize: '1rem',
             margin: 0,
             textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-          }}>Run, collect benefits, avoid obstacles!</p>
+          }}>{t('infoTitle')}</p>
           <p style={{
             color: 'rgba(255,255,255,0.7)',
             fontSize: '0.8rem',
             margin: '4px 0 0 0',
             lineHeight: 1.3
-          }}>Discover what IG Metall membership offers you</p>
+          }}>{t('infoSubtitle')}</p>
         </div>
       </motion.div>
     </div>
   )
 }
 
-export { CHARACTER_TYPES }
 
