@@ -33,19 +33,32 @@ export default function MobileHUD({ score, lives, distance, benefitsCollected, s
         </div>
       </div>
 
-      {/* Bottom bar - Distance, Benefits, Speed */}
-      <div className="hud-bottom-bar">
-        <div className="hud-stat distance">
+      {/* Bottom bar - Distance, Benefits, Speed - with inline styles for guaranteed visibility */}
+      <div
+        className="hud-bottom-bar"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          display: 'flex',
+          background: 'rgba(0, 0, 0, 0.95)',
+          padding: '12px 10px',
+          paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))'
+        }}
+      >
+        <div className="hud-stat distance" style={{ color: '#ffffff' }}>
           <span className="stat-icon">📏</span>
-          <span className="stat-text">{Math.floor(distance)}m</span>
+          <span className="stat-text" style={{ color: '#ffffff' }}>{Math.floor(distance)}m</span>
         </div>
 
-        <div className="hud-stat benefits">
+        <div className="hud-stat benefits" style={{ color: '#ffffff' }}>
           <span className="stat-icon">🤝</span>
-          <span className="stat-text">{benefitsCollected}</span>
+          <span className="stat-text" style={{ color: '#ffffff' }}>{benefitsCollected}</span>
         </div>
 
-        <div className="hud-stat speed">
+        <div className="hud-stat speed" style={{ color: '#ffffff' }}>
           <span className="stat-icon">⚡</span>
           <div className="speed-bar">
             <motion.div

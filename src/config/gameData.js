@@ -62,8 +62,8 @@ export const OFFICE_OBSTACLES = [
   { id: 'box', icon: '📦', name: 'Box', damage: 1, size: 'medium' },
   { id: 'printer', icon: '🖨️', name: 'Printer', damage: 1, size: 'medium' },
   { id: 'plant', icon: '🪴', name: 'Plant', damage: 1, size: 'small' },
-  { id: 'cabinet', icon: '🗄️', name: 'Filing Cabinet', damage: 2, size: 'large' },
-  { id: 'copier', icon: '🖨️', name: 'Copy Machine', damage: 2, size: 'large' },
+  { id: 'cabinet', icon: '🗄️', name: 'Filing Cabinet', damage: 1, size: 'large' },
+  { id: 'copier', icon: '🖨️', name: 'Copy Machine', damage: 1, size: 'large' },
   { id: 'watercooler', icon: '🚰', name: 'Water Cooler', damage: 1, size: 'medium' },
   { id: 'cart', icon: '🛒', name: 'Mail Cart', damage: 1, size: 'medium' },
   { id: 'partition', icon: '🚧', name: 'Partition Wall', damage: 1, size: 'unjumpable' }
@@ -73,13 +73,13 @@ export const OFFICE_OBSTACLES = [
 export const FACTORY_OBSTACLES = [
   { id: 'barrel', icon: '🛢️', name: 'Barrel', damage: 1, size: 'medium' },
   { id: 'crate', icon: '📦', name: 'Crate', damage: 1, size: 'medium' },
-  { id: 'forklift', icon: '🚜', name: 'Forklift', damage: 2, size: 'large' },
-  { id: 'forklift2', icon: '🏗️', name: 'Industrial Forklift', damage: 2, size: 'large' },
+  { id: 'forklift', icon: '🚜', name: 'Forklift', damage: 1, size: 'large' },
+  { id: 'forklift2', icon: '🏗️', name: 'Industrial Forklift', damage: 1, size: 'large' },
   { id: 'pallet', icon: '🪵', name: 'Pallet Stack', damage: 1, size: 'medium' },
-  { id: 'hazard', icon: '⚠️', name: 'Hazard Zone', damage: 2, size: 'large' },
+  { id: 'hazard', icon: '⚠️', name: 'Hazard Zone', damage: 1, size: 'large' },
   { id: 'machinery', icon: '⚙️', name: 'Machinery', damage: 1, size: 'medium' },
   { id: 'oilspill', icon: '🛢️', name: 'Oil Spill', damage: 1, size: 'wide' },
-  { id: 'crane', icon: '🏗️', name: 'Crane Arm', damage: 2, size: 'large' },
+  { id: 'crane', icon: '🏗️', name: 'Crane Arm', damage: 1, size: 'large' },
   { id: 'securitygate', icon: '🚧', name: 'Security Gate', damage: 1, size: 'unjumpable' }
 ]
 

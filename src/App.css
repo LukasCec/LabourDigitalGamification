@@ -606,13 +606,13 @@ body.game-active {
 }
 
 .hud-bottom-bar {
-  display: flex;
+  display: flex !important;
   justify-content: space-around;
   align-items: center;
   gap: 10px;
   padding: 12px 10px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-radius: 0;
@@ -628,6 +628,9 @@ body.game-active {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: transform;
+  /* Ensure visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .hud-stat {
@@ -635,18 +638,21 @@ body.game-active {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  color: white;
+  color: #ffffff !important;
   font-weight: 700;
   font-size: clamp(0.9rem, 3.5vw, 1.1rem);
 }
 
 .stat-icon {
   font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: 1;
 }
 
 .stat-text {
   font-weight: 800;
+  color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: clamp(0.85rem, 3vw, 1rem);
 }
 
 .hud-stat.speed {
