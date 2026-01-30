@@ -644,6 +644,11 @@ function App() {
     }
   }, [playerLane, smoothJumpY, isInvincible, setIsDamaged, setIsInvincible, setLives, setIsExploding, setGameState, setShowBenefitNotification, setBenefitsCollected, setCollectedBenefitIds, playHurtSound, playCollectSound, setItems]);
 
+  // Clear benefit notification callback
+  const clearBenefitNotification = useCallback(() => {
+    setShowBenefitNotification(null)
+  }, [])
+
   // Render character selection
   if (gameState === 'select') {
     return <>
@@ -725,7 +730,7 @@ function App() {
       >
 
         {/* Benefit Notification - Top Center */}
-        <BenefitNotification benefit={showBenefitNotification} />
+        <BenefitNotification benefit={showBenefitNotification} onComplete={clearBenefitNotification} />
 
         {/* Damage Vignette Effect */}
         <DamageVignette isVisible={showDamageVignette} />

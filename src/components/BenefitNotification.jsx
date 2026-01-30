@@ -1,8 +1,20 @@
 import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 
-export default function BenefitNotification({ benefit }) {
+export default function BenefitNotification({ benefit, onComplete }) {
   const { t, language } = useLanguage()
+
+  // Auto-hide notification after 3 seconds
+  useEffect(() => {
+    if (benefit && onComplete) {
+      const timer = setTimeout(() => {
+        onComplete()
+      }, 3000) // 3 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [benefit, onComplete])
 
   if (!benefit) return null
 
@@ -81,4 +93,3 @@ export default function BenefitNotification({ benefit }) {
     </div>
   )
 }
-
