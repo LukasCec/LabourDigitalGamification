@@ -801,7 +801,6 @@ body.game-active {
   border-radius: 30px;
   padding: 25px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  max-height: 90vh;
   overflow-y: auto;
 }
 
@@ -811,7 +810,7 @@ body.game-active {
   color: white;
   text-align: center;
   margin: 0 0 25px 0;
-  text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
 .final-stats {
@@ -869,8 +868,6 @@ body.game-active {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  max-height: 60vh;
-  overflow-y: auto;
   padding-right: 5px;
 }
 
@@ -886,7 +883,6 @@ body.game-active {
   .benefits-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    max-height: 50vh;
   }
 }
 
@@ -899,7 +895,6 @@ body.game-active {
 @media (min-width: 1024px) {
   .benefits-grid {
     grid-template-columns: repeat(5, 1fr);
-    max-height: 40vh;
   }
 }
 

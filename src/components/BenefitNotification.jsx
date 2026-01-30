@@ -36,23 +36,23 @@ export default function BenefitNotification({ benefit, onComplete }) {
     <div
       style={{
         position: 'fixed',
-        top: 0,
+        bottom: 0,
         left: 0,
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'flex-start',
-        paddingTop: '80px',
-        zIndex: 1000,
+        alignItems: 'flex-end',
+        paddingBottom: '100px', // Position above bottom bar
+        zIndex: 10000,
         pointerEvents: 'none'
       }}
     >
       <AnimatePresence>
         <motion.div
           className="benefit-notification-wrapper"
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -50, opacity: 0 }}
+          exit={{ y: 50, opacity: 0 }}
           transition={{
             type: 'spring',
             stiffness: 300,
