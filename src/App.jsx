@@ -480,7 +480,7 @@ function App() {
 
       setFinishLineZ(prevZ => {
         if (prevZ === null) return null
-        const newZ = prevZ + speed * deltaTime * 10 // Move based on time delta
+        const newZ = prevZ + speed * deltaTime * 200 // Match obstacle movement speed
         return newZ
       })
 
