@@ -778,7 +778,7 @@ function App() {
           {!isExploding && (
             <Player3DModel
               characterType={characterType}
-              position={[smoothLaneX, isDucking ? -0.5 : smoothJumpY, 0]}
+              position={[smoothLaneX, isDucking ? -0.5 : smoothJumpY, 3]}
               isJumping={isJumping}
               isDucking={isDucking}
               isDamaged={isDamaged}

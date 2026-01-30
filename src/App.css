@@ -1043,9 +1043,9 @@ body.game-active {
 }
 
 .benefit-notification-content {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(5px);
+
   border-radius: 20px;
   padding: 20px 30px;
   box-shadow:
@@ -1236,5 +1236,3 @@ body:not(.game-active) {
     min-height: 100vh;
   }
 }
-
-
