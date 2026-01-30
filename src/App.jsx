@@ -16,9 +16,10 @@ import MobileHUD from './components/MobileHUD'
 import GameOver from './components/GameOver'
 import BenefitNotification from './components/BenefitNotification'
 import DamageVignette from './components/DamageVignette'
+import Win from './components/Win'
 
 // Game data
-import { getRandomBenefit, getRandomObstacle } from './config/gameData'
+import { getRandomBenefit, getRandomObstacle, BENEFITS } from './config/gameData'
 
 // Game constants
 const GAME_CONFIG = {
@@ -34,7 +35,7 @@ const GAME_CONFIG = {
 
 function App() {
   // Game state
-  const [gameState, setGameState] = useState('select') // select, playing, exploding, gameover
+  const [gameState, setGameState] = useState('select') // select, playing, exploding, gameover, win
   const [characterType, setCharacterType] = useState(null)
 
   // Player state
@@ -59,6 +60,8 @@ function App() {
 
   // Items on screen (3D objects)
   const [items, setItems] = useState([])
+  const [finishLineActive, setFinishLineActive] = useState(false)
+  const [finishLineZ, setFinishLineZ] = useState(null)
 
   // Refs
   const nextItemId = useRef(0)
@@ -80,7 +83,7 @@ function App() {
 
     try {
       // Create AudioContext (with webkit prefix for older Safari)
-      const AudioContext = window.AudioContext || window.webkitAudioContext
+      const AudioContext = window.AudioContext || window.webkit.AudioContext
       audioContextRef.current = new AudioContext()
 
       // Resume context if suspended (required for mobile)
@@ -352,8 +355,19 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [gameState, isDucking, playDashSound, playJumpSound])
 
+  // Helper: check if all benefits collected
+  const allBenefitsCollected = BENEFITS.every(b => collectedBenefitIds.includes(b.id))
+
   // Spawn items (benefits and obstacles)
   const spawnItem = useCallback(() => {
+    if (allBenefitsCollected && !finishLineActive) {
+      // Place finish line far ahead
+      setFinishLineActive(true)
+      setFinishLineZ(-120)
+      return
+    }
+    if (allBenefitsCollected) return // No more obstacles/benefits
+
     // Benefits spawn only every 200 meters
     const shouldSpawnBenefit = distance - lastBenefitDistance.current >= GAME_CONFIG.BENEFIT_DISTANCE_INTERVAL
 
@@ -415,105 +429,9 @@ function App() {
     }
 
     setItems(prev => [...prev, ...newItems])
-  }, [characterType, getLanePosition, distance])
+  }, [characterType, getLanePosition, distance, allBenefitsCollected, finishLineActive])
 
-  // Collision detection - only triggers once per item
-  const checkCollision = useCallback((item, itemZ) => {
-    // Remove items that passed the player (far behind - increased to 20 so disappearing is not visible)
-    if (itemZ > 20) {
-      setItems(prev => prev.filter(i => i.id !== item.id))
-      return true
-    }
-
-    // Check if item is in collision zone (tight zone near player)
-    if (itemZ > -1 && itemZ < 1.5) {
-      // Check if item already processed or avoided (use state, not direct mutation)
-      if (item.processed || item.avoided) return false
-
-      if (item.lane === playerLane) {
-        if (item.type === 'benefit') {
-          // Play collect sound
-          playCollectSound()
-
-          // Collect benefit - use benefit's actual ID (e.g., 'legal', 'strike')
-          setScore(prev => prev + item.points)
-          setBenefitsCollected(prev => prev + 1)
-          // Store the benefit type ID (benefitId), not the item's unique ID
-          setCollectedBenefitIds(prev => [...new Set([...prev, item.benefitId])])
-
-          // Show benefit notification
-          setShowBenefitNotification({
-            name: item.name,
-            icon: item.icon,
-            points: item.points
-          })
-          setTimeout(() => setShowBenefitNotification(null), 3000) // Hide after 3 seconds
-
-          // Remove only this specific item by its unique ID
-          setItems(prev => prev.filter(i => i.id !== item.id))
-          return true
-        } else {
-          // Hit obstacle - check if jumping high enough or ducking
-          // Unjumpable obstacles ALWAYS deal damage - cannot be avoided by jumping
-          const isUnjumpable = item.size === 'unjumpable'
-          const isHighEnough = smoothJumpY > 1.0
-
-          if (isUnjumpable || (!isHighEnough && !isDucking)) {
-            // Skip damage if player is invincible
-            if (isInvincible) {
-              // Remove obstacle but don't take damage
-              setItems(prev => prev.filter(i => i.id !== item.id))
-              return true
-            }
-
-            // Play hurt sound
-            playHurtSound()
-
-            // Damage flash effect on player
-            setIsDamaged(true)
-            setTimeout(() => setIsDamaged(false), 500)
-
-            // Set invincibility for 1 second
-            setIsInvincible(true)
-            setTimeout(() => setIsInvincible(false), 1000)
-
-            // Damage vignette effect on screen
-            setShowDamageVignette(true)
-            setTimeout(() => setShowDamageVignette(false), 600)
-
-            setLives(prev => {
-              const newLives = Math.max(0, prev - item.damage)
-              if (newLives <= 0) {
-                // Trigger explosion effect before game over
-                setIsExploding(true)
-                // Wait for explosion animation, then show game over
-                setTimeout(() => {
-                  setIsExploding(false)
-                  setGameState('gameover')
-                }, 2000) // 2 second explosion
-              }
-              return newLives
-            })
-            // Remove only this specific item by its unique ID
-            setItems(prev => prev.filter(i => i.id !== item.id))
-            return true
-          } else {
-            // Successfully avoided by jumping/ducking - add points
-            // Mark as avoided in state to prevent re-processing
-            setScore(prev => prev + 10)
-            setItems(prev => prev.map(i =>
-              i.id === item.id ? { ...i, avoided: true } : i
-            ))
-            return false // Don't remove, let it pass
-          }
-        }
-      }
-    }
-
-    return false
-  }, [playerLane, smoothJumpY, isDucking, isInvincible, playHurtSound, playCollectSound])
-
-  // Game loop
+  // In game loop: move finish line Z if active
   useEffect(() => {
     if (gameState !== 'playing' || isExploding) return
 
@@ -522,6 +440,11 @@ function App() {
 
       // Update distance (slower increment)
       setDistance(prev => prev + speed * 10)
+
+      // Move finish line Z if active
+      if (finishLineActive && finishLineZ !== null) {
+        setFinishLineZ(z => z + speed * 10)
+      }
 
       // Dynamic spawn interval - decreases as speed increases
       // At base speed (0.08): 1200ms, at max speed (0.30): ~600ms
@@ -541,7 +464,7 @@ function App() {
     }, 100)
 
     return () => clearInterval(gameLoop)
-  }, [gameState, speed, spawnItem, isExploding])
+  }, [gameState, speed, spawnItem, isExploding, finishLineActive, finishLineZ])
 
   // Reset game
   const resetGame = useCallback(() => {
@@ -609,42 +532,73 @@ function App() {
   // === Background Music ===
   const bgMusicRef = useRef(null)
   const [musicStarted, setMusicStarted] = useState(false)
+  const [musicMuted, setMusicMuted] = useState(false)
 
-  // Start music on first user interaction (for mobile autoplay policy)
+  // Try to play music on every user gesture if not playing
   useEffect(() => {
-    if (!musicStarted) {
-      const startMusic = () => {
-        try {
-          if (bgMusicRef.current) {
-            bgMusicRef.current.volume = 0.18
-            bgMusicRef.current.loop = true
-            bgMusicRef.current.play().catch(() => {})
+    const tryPlayMusic = () => {
+      if (bgMusicRef.current) {
+        if (bgMusicRef.current.paused || bgMusicRef.current.currentTime === 0) {
+          bgMusicRef.current.muted = musicMuted
+          bgMusicRef.current.volume = musicMuted ? 0 : 0.18
+          bgMusicRef.current.loop = true
+          const playPromise = bgMusicRef.current.play()
+          if (playPromise) {
+            playPromise.then(() => {
+              console.log('BG music started')
+              setMusicStarted(true)
+            }).catch((e) => {
+              console.log('BG music play error:', e)
+            })
           }
-        } catch (e) {}
-        setMusicStarted(true)
-        window.removeEventListener('pointerdown', startMusic)
-        window.removeEventListener('touchstart', startMusic)
-        window.removeEventListener('keydown', startMusic)
-      }
-      window.addEventListener('pointerdown', startMusic)
-      window.addEventListener('touchstart', startMusic)
-      window.addEventListener('keydown', startMusic)
-      return () => {
-        window.removeEventListener('pointerdown', startMusic)
-        window.removeEventListener('touchstart', startMusic)
-        window.removeEventListener('keydown', startMusic)
+        }
       }
     }
-  }, [musicStarted])
+    window.addEventListener('pointerdown', tryPlayMusic)
+    window.addEventListener('touchstart', tryPlayMusic)
+    window.addEventListener('keydown', tryPlayMusic)
+    return () => {
+      window.removeEventListener('pointerdown', tryPlayMusic)
+      window.removeEventListener('touchstart', tryPlayMusic)
+      window.removeEventListener('keydown', tryPlayMusic)
+    }
+  }, [musicMuted])
+
+  // Toggle mute
+  const toggleMusic = () => {
+    setMusicMuted(m => {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.muted = !m
+        bgMusicRef.current.volume = !m ? 0 : 0.18
+      }
+      return !m
+    })
+  }
+
+  // --- Always render audio element (no mute button) ---
+  const AudioAndMute = (
+    <audio
+      ref={bgMusicRef}
+      src={'/sounds/bg_music_sound.mp3'}
+      preload="auto"
+      autoPlay={false}
+      loop
+      style={{ display: 'none' }}
+    />
+  )
 
   // Render character selection
   if (gameState === 'select') {
-    return <CharacterSelect onSelect={handleCharacterSelect} />
+    return <>
+      {AudioAndMute}
+      <CharacterSelect onSelect={handleCharacterSelect} />
+    </>
   }
 
   // Render game over
   if (gameState === 'gameover') {
-    return (
+    return <>
+      {AudioAndMute}
       <GameOver
         score={score}
         distance={distance}
@@ -653,22 +607,28 @@ function App() {
         onRestart={resetGame}
         onMainMenu={goToMainMenu}
       />
-    )
+    </>
+  }
+
+  // Render win screen
+  if (gameState === 'win') {
+    return <>
+      {AudioAndMute}
+      <Win
+        score={score}
+        distance={distance}
+        benefitsCollected={benefitsCollected}
+        collectedBenefits={collectedBenefitIds}
+        onRestart={resetGame}
+        onMainMenu={goToMainMenu}
+      />
+    </>
   }
 
   // Render 3D game
   return (
     <>
-      {/* Global background music (looped, always present) */}
-      <audio
-        ref={bgMusicRef}
-        src={'/sounds/bg_music_sound.mp3'}
-        preload="auto"
-        autoPlay={false}
-        loop
-        style={{ display: 'none' }}
-      />
-
+      {AudioAndMute}
       {/* Bottom HUD Bar - Rendered outside game container for guaranteed visibility */}
       <div
         style={{
@@ -782,6 +742,23 @@ function App() {
               />
             )
           })}
+
+          {finishLineActive && finishLineZ !== null && (
+            <group position={[0, 0.1, finishLineZ]}>
+              {[...Array(10)].map((_, i) => (
+                <mesh key={'w'+i} position={[-4.5 + i, 0, 0]}>
+                  <boxGeometry args={[0.9, 0.2, 0.5]} />
+                  <meshStandardMaterial color={i % 2 === 0 ? '#fff' : '#111'} />
+                </mesh>
+              ))}
+              {[...Array(10)].map((_, i) => (
+                <mesh key={'b'+i} position={[-4.5 + i, 0, 0.5]}>
+                  <boxGeometry args={[0.9, 0.2, 0.5]} />
+                  <meshStandardMaterial color={i % 2 === 1 ? '#fff' : '#111'} />
+                </mesh>
+              ))}
+            </group>
+            )}
         </Suspense>
       </Canvas>
     </motion.div>

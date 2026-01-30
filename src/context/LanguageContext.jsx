@@ -105,7 +105,7 @@ export function useLanguage() {
 }
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState('de') // Default to German
 
   const t = (key) => {
     return translations[language][key] || key
@@ -117,5 +117,3 @@ export function LanguageProvider({ children }) {
     </LanguageContext.Provider>
   )
 }
-
-
