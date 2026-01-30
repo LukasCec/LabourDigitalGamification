@@ -65,99 +65,96 @@ function App() {
   const gameStartTime = useRef(null)
   const touchStartX = useRef(null)
   const touchStartY = useRef(null)
-  const dashSoundRef = useRef(null)
-  const jumpSoundRef = useRef(null)
-  const hurtSoundRef = useRef(null)
-  const collectSoundRef = useRef(null)
-  const audioUnlockedRef = useRef(false)
 
-  // Initialize and preload sounds for mobile
-  useEffect(() => {
-    // Create audio elements with preload
-    const createAudio = (src, volume) => {
-      const audio = new Audio(src)
-      audio.preload = 'auto'
-      audio.volume = volume
-      // Force load the audio
-      audio.load()
-      return audio
-    }
+  // Web Audio API refs for reliable mobile sound
+  const audioContextRef = useRef(null)
+  const audioBuffersRef = useRef({})
+  const audioInitializedRef = useRef(false)
 
-    dashSoundRef.current = createAudio('/sounds/dash_sound.wav', 0.5)
-    jumpSoundRef.current = createAudio('/sounds/jump_sound.wav', 0.5)
-    hurtSoundRef.current = createAudio('/sounds/hurt_sound.wav', 0.6)
-    collectSoundRef.current = createAudio('/sounds/collect_sound.wav', 0.5)
+  // Initialize Web Audio API
+  const initAudio = useCallback(async () => {
+    if (audioInitializedRef.current) return
 
-    // Unlock audio on first user interaction (required for mobile)
-    const unlockAudio = () => {
-      if (audioUnlockedRef.current) return
+    try {
+      // Create AudioContext (with webkit prefix for older Safari)
+      const AudioContext = window.AudioContext || window.webkitAudioContext
+      audioContextRef.current = new AudioContext()
 
-      // Play and immediately pause all sounds to unlock them
-      const sounds = [dashSoundRef, jumpSoundRef, hurtSoundRef, collectSoundRef]
-      sounds.forEach(ref => {
-        if (ref.current) {
-          ref.current.play().then(() => {
-            ref.current.pause()
-            ref.current.currentTime = 0
-          }).catch(() => {})
+      // Resume context if suspended (required for mobile)
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume()
+      }
+
+      // Load all sound files
+      const soundFiles = {
+        dash: '/sounds/dash_sound.wav',
+        jump: '/sounds/jump_sound.wav',
+        hurt: '/sounds/hurt_sound.wav',
+        collect: '/sounds/collect_sound.wav'
+      }
+
+      for (const [name, url] of Object.entries(soundFiles)) {
+        try {
+          const response = await fetch(url)
+          const arrayBuffer = await response.arrayBuffer()
+          const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer)
+          audioBuffersRef.current[name] = audioBuffer
+        } catch (e) {
+          console.warn(`Failed to load sound: ${name}`, e)
         }
-      })
+      }
 
-      audioUnlockedRef.current = true
-      // Remove listeners after unlock
-      document.removeEventListener('touchstart', unlockAudio)
-      document.removeEventListener('touchend', unlockAudio)
-      document.removeEventListener('click', unlockAudio)
+      audioInitializedRef.current = true
+    } catch (e) {
+      console.warn('Web Audio API not supported', e)
+    }
+  }, [])
+
+  // Play sound using Web Audio API
+  const playSound = useCallback((soundName, volume = 0.5) => {
+    if (!audioContextRef.current || !audioBuffersRef.current[soundName]) return
+
+    try {
+      // Resume context if suspended
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume()
+      }
+
+      const source = audioContextRef.current.createBufferSource()
+      const gainNode = audioContextRef.current.createGain()
+
+      source.buffer = audioBuffersRef.current[soundName]
+      gainNode.gain.value = volume
+
+      source.connect(gainNode)
+      gainNode.connect(audioContextRef.current.destination)
+
+      source.start(0)
+    } catch (e) {
+      // Silently fail
+    }
+  }, [])
+
+  // Initialize audio on first user interaction
+  useEffect(() => {
+    const handleInteraction = () => {
+      initAudio()
     }
 
-    document.addEventListener('touchstart', unlockAudio, { once: false })
-    document.addEventListener('touchend', unlockAudio, { once: false })
-    document.addEventListener('click', unlockAudio, { once: false })
+    document.addEventListener('touchstart', handleInteraction, { once: true })
+    document.addEventListener('click', handleInteraction, { once: true })
 
     return () => {
-      document.removeEventListener('touchstart', unlockAudio)
-      document.removeEventListener('touchend', unlockAudio)
-      document.removeEventListener('click', unlockAudio)
+      document.removeEventListener('touchstart', handleInteraction)
+      document.removeEventListener('click', handleInteraction)
     }
-  }, [])
+  }, [initAudio])
 
-  // Optimized sound play function - clone node for better mobile performance
-  const playSound = useCallback((audioRef) => {
-    if (audioRef.current) {
-      try {
-        // Clone the audio node for overlapping sounds and better mobile performance
-        const clone = audioRef.current.cloneNode()
-        clone.volume = audioRef.current.volume
-        clone.play().catch(() => {})
-        // Clean up clone after it finishes
-        clone.onended = () => clone.remove()
-      } catch {
-        // Fallback to original method
-        audioRef.current.currentTime = 0
-        audioRef.current.play().catch(() => {})
-      }
-    }
-  }, [])
-
-  // Play dash sound function
-  const playDashSound = useCallback(() => {
-    playSound(dashSoundRef)
-  }, [playSound])
-
-  // Play jump sound function
-  const playJumpSound = useCallback(() => {
-    playSound(jumpSoundRef)
-  }, [playSound])
-
-  // Play hurt sound function
-  const playHurtSound = useCallback(() => {
-    playSound(hurtSoundRef)
-  }, [playSound])
-
-  // Play collect sound function
-  const playCollectSound = useCallback(() => {
-    playSound(collectSoundRef)
-  }, [playSound])
+  // Sound play functions
+  const playDashSound = useCallback(() => playSound('dash', 0.5), [playSound])
+  const playJumpSound = useCallback(() => playSound('jump', 0.5), [playSound])
+  const playHurtSound = useCallback(() => playSound('hurt', 0.6), [playSound])
+  const playCollectSound = useCallback(() => playSound('collect', 0.5), [playSound])
 
   // Get lane X position in 3D space
   const getLanePosition = useCallback((lane) => {

@@ -519,10 +519,16 @@ body.game-active {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 1000;
+  /* Ensure children can be positioned correctly */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 /* Allow clicks on interactive HUD elements */
@@ -604,9 +610,9 @@ body.game-active {
   justify-content: space-around;
   align-items: center;
   gap: 10px;
-  padding: 15px 10px;
-  padding-bottom: max(15px, env(safe-area-inset-bottom));
-  background: rgba(0, 0, 0, 0.8);
+  padding: 12px 10px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-radius: 0;
@@ -616,8 +622,12 @@ body.game-active {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 1001;
+  z-index: 9999;
   width: 100%;
+  /* Force GPU acceleration and visibility */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
 .hud-stat {
