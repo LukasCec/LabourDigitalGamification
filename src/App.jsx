@@ -581,54 +581,98 @@ function App() {
 
   // Render 3D game
   return (
-    <motion.div
-      className="game-3d-container"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-    >
-
-      {/* Benefit Notification - Top Center */}
-      <BenefitNotification benefit={showBenefitNotification} />
-
-      {/* Damage Vignette Effect */}
-      <DamageVignette isVisible={showDamageVignette} />
-
-      {/* Mobile HUD */}
-      <MobileHUD
-        score={score}
-        lives={lives}
-        distance={distance}
-        benefitsCollected={benefitsCollected}
-        speed={speed}
-      />
-
-      {/* 3D Canvas */}
-      <Canvas
+    <>
+      {/* Bottom HUD Bar - Rendered outside game container for guaranteed visibility */}
+      <div
         style={{
-          position: 'absolute',
-          top: 0,
+          position: 'fixed',
+          bottom: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 0
+          right: 0,
+          zIndex: 99999,
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '12px 10px',
+          paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+          background: 'rgba(0, 0, 0, 0.95)',
+          borderTop: '2px solid rgba(255, 255, 255, 0.15)',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.5)',
         }}
-        camera={{
-          position: [0, 5, 10],
-          fov: 70,
-          near: 0.1,
-          far: 1000
-        }}
-        gl={{
-          antialias: true,
-          alpha: false,
-          powerPreference: 'high-performance'
-        }}
-        dpr={[1, 2]} // Limit pixel ratio for mobile performance
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#ffffff' }}>
+          <span style={{ fontSize: '1.5rem' }}>📏</span>
+          <span style={{ fontWeight: 800, color: '#ffffff' }}>{Math.floor(distance)}m</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#ffffff' }}>
+          <span style={{ fontSize: '1.5rem' }}>🤝</span>
+          <span style={{ fontWeight: 800, color: '#ffffff' }}>{benefitsCollected}</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#ffffff', minWidth: '80px' }}>
+          <span style={{ fontSize: '1.5rem' }}>⚡</span>
+          <div style={{ width: '100%', height: '10px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '5px', overflow: 'hidden' }}>
+            <div
+              style={{
+                height: '100%',
+                width: `${Math.min((speed / 0.25) * 100, 100)}%`,
+                background: 'linear-gradient(90deg, #22c55e, #fbbf24, #f59e0b, #ef4444)',
+                borderRadius: '5px',
+                transition: 'width 0.3s ease'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <motion.div
+        className="game-3d-container"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
       >
 
-        <Suspense fallback={null}>
+        {/* Benefit Notification - Top Center */}
+        <BenefitNotification benefit={showBenefitNotification} />
+
+        {/* Damage Vignette Effect */}
+        <DamageVignette isVisible={showDamageVignette} />
+
+        {/* Mobile HUD - Top bar only */}
+        <MobileHUD
+          score={score}
+          lives={lives}
+          distance={distance}
+          benefitsCollected={benefitsCollected}
+          speed={speed}
+        />
+
+        {/* 3D Canvas */}
+        <Canvas
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 0
+          }}
+          camera={{
+            position: [0, 5, 10],
+            fov: 70,
+            near: 0.1,
+            far: 1000
+          }}
+          gl={{
+            antialias: true,
+            alpha: false,
+            powerPreference: 'high-performance'
+          }}
+          dpr={[1, 2]} // Limit pixel ratio for mobile performance
+        >
+
+          <Suspense fallback={null}>
           {/* Game Scene (environment, lighting) */}
           <GameScene characterType={characterType} />
 
@@ -657,6 +701,7 @@ function App() {
         </Suspense>
       </Canvas>
     </motion.div>
+    </>
   )
 }
 
