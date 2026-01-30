@@ -868,12 +868,38 @@ body.game-active {
 .benefits-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
-@media (min-width: 480px) {
+/* Better responsive grid */
+@media (min-width: 380px) {
   .benefits-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (min-width: 640px) {
+  .benefits-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-height: 50vh;
+  }
+}
+
+@media (min-width: 768px) {
+  .benefits-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .benefits-grid {
+    grid-template-columns: repeat(5, 1fr);
+    max-height: 40vh;
   }
 }
 
@@ -883,6 +909,20 @@ body.game-active {
   padding: 15px;
   text-align: center;
   border: 2px solid rgba(255,255,255,0.2);
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 480px) {
+  .benefit-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .benefit-card {
+    padding: 8px;
+  }
 }
 
 .benefit-icon {
