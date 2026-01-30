@@ -8,6 +8,7 @@ import GameScene from './components/3d/GameScene'
 import Player3DModel from './components/3d/Player3DModel'
 import Obstacle3D from './components/3d/Obstacle3D'
 import Benefit3D from './components/3d/Benefit3D'
+import PlayerExplosion from './components/3d/PlayerExplosion'
 
 // UI Components
 import CharacterSelect from './components/CharacterSelect'
@@ -33,7 +34,7 @@ const GAME_CONFIG = {
 
 function App() {
   // Game state
-  const [gameState, setGameState] = useState('select') // select, playing, gameover
+  const [gameState, setGameState] = useState('select') // select, playing, exploding, gameover
   const [characterType, setCharacterType] = useState(null)
 
   // Player state
@@ -43,6 +44,8 @@ function App() {
   const [isJumping, setIsJumping] = useState(false)
   const [isDucking, setIsDucking] = useState(false)
   const [isDamaged, setIsDamaged] = useState(false) // Red flash on damage
+  const [isInvincible, setIsInvincible] = useState(false) // 1 second invincibility after damage
+  const [isExploding, setIsExploding] = useState(false) // Player death explosion
   const [showBenefitNotification, setShowBenefitNotification] = useState(null) // Current benefit collected
   const [showDamageVignette, setShowDamageVignette] = useState(false) // Red screen edge effect
 
@@ -456,12 +459,23 @@ function App() {
           const isHighEnough = smoothJumpY > 1.0
 
           if (isUnjumpable || (!isHighEnough && !isDucking)) {
+            // Skip damage if player is invincible
+            if (isInvincible) {
+              // Remove obstacle but don't take damage
+              setItems(prev => prev.filter(i => i.id !== item.id))
+              return true
+            }
+
             // Play hurt sound
             playHurtSound()
 
             // Damage flash effect on player
             setIsDamaged(true)
             setTimeout(() => setIsDamaged(false), 500)
+
+            // Set invincibility for 1 second
+            setIsInvincible(true)
+            setTimeout(() => setIsInvincible(false), 1000)
 
             // Damage vignette effect on screen
             setShowDamageVignette(true)
@@ -470,7 +484,13 @@ function App() {
             setLives(prev => {
               const newLives = Math.max(0, prev - item.damage)
               if (newLives <= 0) {
-                setGameState('gameover')
+                // Trigger explosion effect before game over
+                setIsExploding(true)
+                // Wait for explosion animation, then show game over
+                setTimeout(() => {
+                  setIsExploding(false)
+                  setGameState('gameover')
+                }, 2000) // 2 second explosion
               }
               return newLives
             })
@@ -491,11 +511,11 @@ function App() {
     }
 
     return false
-  }, [playerLane, smoothJumpY, isDucking, playHurtSound, playCollectSound])
+  }, [playerLane, smoothJumpY, isDucking, isInvincible, playHurtSound, playCollectSound])
 
   // Game loop
   useEffect(() => {
-    if (gameState !== 'playing') return
+    if (gameState !== 'playing' || isExploding) return
 
     const gameLoop = setInterval(() => {
       const now = Date.now()
@@ -517,7 +537,7 @@ function App() {
     }, 100)
 
     return () => clearInterval(gameLoop)
-  }, [gameState, speed, spawnItem])
+  }, [gameState, speed, spawnItem, isExploding])
 
   // Reset game
   const resetGame = useCallback(() => {
@@ -526,6 +546,8 @@ function App() {
     setSmoothLaneX(0) // Reset smooth position to center
     setIsJumping(false)
     setIsDucking(false)
+    setIsExploding(false) // Reset explosion state
+    setIsInvincible(false) // Reset invincibility
     setScore(0)
     setLives(GAME_CONFIG.STARTING_LIVES)
     setDistance(0)
@@ -676,24 +698,34 @@ function App() {
           {/* Game Scene (environment, lighting) */}
           <GameScene characterType={characterType} />
 
-          {/* Player */}
-          <Player3DModel
-            characterType={characterType}
-            position={[smoothLaneX, isDucking ? -0.5 : smoothJumpY, 0]}
-            isJumping={isJumping}
-            isDucking={isDucking}
-            isDamaged={isDamaged}
-            isRunning={true}
-          />
+          {/* Player - hide when exploding */}
+          {!isExploding && (
+            <Player3DModel
+              characterType={characterType}
+              position={[smoothLaneX, isDucking ? -0.5 : smoothJumpY, 0]}
+              isJumping={isJumping}
+              isDucking={isDucking}
+              isDamaged={isDamaged}
+              isRunning={true}
+            />
+          )}
 
-          {/* Items (obstacles and benefits) */}
+          {/* Player Explosion Effect */}
+          {isExploding && (
+            <PlayerExplosion
+              position={[smoothLaneX, smoothJumpY, 0]}
+              characterType={characterType}
+            />
+          )}
+
+          {/* Items (obstacles and benefits) - freeze when exploding */}
           {items.map(item => {
             const ItemComponent = item.type === 'benefit' ? Benefit3D : Obstacle3D
             return (
               <ItemComponent
                 key={item.uniqueKey || item.id}
                 item={item}
-                speed={speed}
+                speed={isExploding ? 0 : speed}
                 onCollision={(itemZ) => checkCollision(item, itemZ)}
               />
             )

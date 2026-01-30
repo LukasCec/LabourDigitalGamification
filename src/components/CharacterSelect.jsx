@@ -1,5 +1,5 @@
 import { useState, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
 import Player3DModel from './3d/Player3DModel'
@@ -9,23 +9,20 @@ const CHARACTER_TYPES = {
     id: 'office',
     title: 'Office Worker',
     icon: '👔',
-    description: 'Navigate through the modern office, collecting benefits while avoiding workplace hazards',
-    color: '#3b82f6',
-    gradient: 'from-blue-500 to-cyan-500'
+    description: 'Office environment',
+    color: '#3b82f6'
   },
   FACTORY: {
     id: 'factory',
     title: 'Factory Worker',
     icon: '⚙️',
-    description: 'Run through the industrial facility, gather union benefits and dodge obstacles',
-    color: '#f59e0b',
-    gradient: 'from-amber-500 to-orange-600'
+    description: 'Factory environment',
+    color: '#f59e0b'
   }
 }
 
 export default function CharacterSelect({ onSelect }) {
   const [selectedCharacter, setSelectedCharacter] = useState('office')
-  const [isHovering, setIsHovering] = useState(null)
 
   const handleSelect = (charId) => {
     setSelectedCharacter(charId)
@@ -38,148 +35,334 @@ export default function CharacterSelect({ onSelect }) {
   const currentChar = CHARACTER_TYPES[selectedCharacter.toUpperCase()]
 
   return (
-    <div className="character-select-modern ">
-      {/* Background gradient overlay */}
-      <div className="select-bg-overlay" />
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      height: '100dvh',
+      overflow: 'hidden',
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'fixed',
+      top: 0,
+      left: 0
+    }}>
+      {/* Background overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.15) 0%, transparent 50%)',
+        pointerEvents: 'none'
+      }} />
 
-      {/* Main content */}
-      <div className="select-container">
-        {/* Left side - Character preview */}
-        <motion.div
-          className="character-preview-section"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="preview-header">
-            <h2 className="preview-title">Character Preview</h2>
-            <div className="preview-subtitle">{currentChar.title}</div>
-          </div>
-
-          {/* 3D Preview */}
-          <div className="character-3d-preview">
-            <Canvas
-              camera={{ position: [0, 2, 5], fov: 50 }}
-              gl={{ antialias: true, alpha: true }}
-            >
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[5, 5, 5]} intensity={1} />
-                <pointLight position={[-5, 5, 0]} intensity={0.5} color="#3b82f6" />
-
-                <Player3DModel
-                  characterType={selectedCharacter}
-                  position={[0, 0, 0]}
-                  isJumping={false}
-                  isDucking={false}
-                  isDamaged={false}
-                  isRunning={true}
-                />
-
-                <ContactShadows
-                  position={[0, -0.5, 0]}
-                  opacity={0.4}
-                  scale={3}
-                  blur={2}
-                />
-
-                <Environment preset="sunset" />
-                <OrbitControls
-                  enableZoom={false}
-                  enablePan={false}
-                  minPolarAngle={Math.PI / 3}
-                  maxPolarAngle={Math.PI / 2}
-                  autoRotate
-                  autoRotateSpeed={2}
-                />
-              </Suspense>
-            </Canvas>
-          </div>
-        </motion.div>
-
-        {/* Right side - Selection & Info */}
-        <motion.div
-          className="character-selection-section"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          {/* Header */}
-          <div className="selection-header">
-            <motion.h1
-              className="game-title-modern"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <span className="title-icon">⚙️</span>
-              IG Metall Runner
-            </motion.h1>
-            <p className="game-subtitle-modern">Choose Your Worker</p>
-          </div>
-
-          {/* Character cards */}
-          <div className="character-cards-modern">
-            {Object.values(CHARACTER_TYPES).map((char) => (
-              <motion.div
-                key={char.id}
-                className={`character-card-modern ${selectedCharacter === char.id ? 'selected' : ''}`}
-                onClick={() => handleSelect(char.id)}
-                onHoverStart={() => setIsHovering(char.id)}
-                onHoverEnd={() => setIsHovering(null)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="card-icon-badge">
-                  {char.icon}
-                </div>
-                <div className="card-content">
-                  <h3 className="card-title">{char.title}</h3>
-                  <p className="card-description">{char.description}</p>
-                </div>
-                <div className={`card-selector ${selectedCharacter === char.id ? 'active' : ''}`}>
-                  {selectedCharacter === char.id && (
-                    <motion.div
-                      className="selector-checkmark"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                    >
-                      ✓
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* IG Metall info */}
-          <motion.div
-            className="ig-metall-info-modern"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+      {/* Title - Animated and exciting */}
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          padding: '10px 15px',
+          paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
+          textAlign: 'center',
+          zIndex: 10
+        }}
+      >
+        {/* Main title with gradient and glow */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px'
+        }}>
+          {/* Gear emoji - separate from gradient text */}
+          <motion.span
+            animate={{
+              rotate: 360,
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              rotate: { duration: 3, repeat: Infinity, ease: 'linear' },
+              scale: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+            }}
+            style={{
+              display: 'inline-block',
+              fontSize: 'clamp(2rem, 8vw, 3rem)',
+              filter: 'drop-shadow(0 0 10px rgba(251, 191, 36, 0.6))'
+            }}
           >
-            <div className="info-icon">🤝</div>
-            <div className="info-text">
-              <strong>Collect IG Metall Benefits</strong>
-              <span>Legal protection, strike assistance, accident insurance & more!</span>
-            </div>
-          </motion.div>
+            ⚙️
+          </motion.span>
 
-          {/* Start button */}
+          {/* Text with gradient */}
+          <motion.h1
+            style={{
+              fontSize: 'clamp(2rem, 8vw, 3rem)',
+              fontWeight: 900,
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'linear-gradient(135deg, #22c55e, #3b82f6, #8b5cf6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 2px 10px rgba(59, 130, 246, 0.5))'
+            }}
+          >
+            <span>METALL</span>
+            <motion.span
+              animate={{
+                color: ['#22c55e', '#3b82f6', '#8b5cf6', '#22c55e']
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              style={{
+                WebkitTextFillColor: 'initial',
+                fontStyle: 'italic'
+              }}
+            >
+              RUSH
+            </motion.span>
+          </motion.h1>
+        </div>
+
+        {/* Subtitle with typing effect feel */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          style={{
+            fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)',
+            color: 'rgba(255,255,255,0.7)',
+            margin: '5px 0 0 0',
+            fontWeight: 500,
+            letterSpacing: '2px',
+            textTransform: 'uppercase'
+          }}
+        >
+          <motion.span
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            ⚡
+          </motion.span>
+          {' '}Run • Collect • Protect{' '}
+          <motion.span
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+          >
+            ⚡
+          </motion.span>
+        </motion.p>
+      </motion.div>
+
+      {/* 3D Character Preview - Reduced height, adjusted camera */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        style={{
+          flex: '0 0 auto',
+          height: '25vh',
+          minHeight: '140px',
+          maxHeight: '200px',
+          position: 'relative',
+          zIndex: 5
+        }}
+      >
+        <Canvas
+          camera={{ position: [0, 1.5, 4], fov: 50 }}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: 'transparent' }}
+        >
+          <Suspense fallback={null}>
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
+            <pointLight position={[-5, 5, 0]} intensity={0.5} color="#3b82f6" />
+
+            <Player3DModel
+              characterType={selectedCharacter}
+              position={[0, -0.5, 0]}
+              isJumping={false}
+              isDucking={false}
+              isDamaged={false}
+              isRunning={true}
+            />
+
+            <ContactShadows position={[0, -1, 0]} opacity={0.4} scale={3} blur={2} />
+            <Environment preset="sunset" />
+            <OrbitControls
+              enableZoom={false}
+              enablePan={false}
+              minPolarAngle={Math.PI / 3}
+              maxPolarAngle={Math.PI / 2}
+              autoRotate
+              autoRotateSpeed={2}
+              target={[0, 0.5, 0]}
+            />
+          </Suspense>
+        </Canvas>
+      </motion.div>
+
+      {/* Play Button - Above character selection */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '15px',
+          zIndex: 10
+        }}
+      >
+        <motion.button
+          onClick={handleStart}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          animate={{
+            boxShadow: [
+              '0 0 20px rgba(34, 197, 94, 0.4), 0 0 40px rgba(34, 197, 94, 0.2)',
+              '0 0 30px rgba(34, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.3)',
+              '0 0 20px rgba(34, 197, 94, 0.4), 0 0 40px rgba(34, 197, 94, 0.2)'
+            ]
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+          style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+            border: '4px solid rgba(255, 255, 255, 0.3)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Play triangle */}
+          <div style={{
+            width: 0,
+            height: 0,
+            borderTop: '20px solid transparent',
+            borderBottom: '20px solid transparent',
+            borderLeft: '32px solid white',
+            marginLeft: '8px',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+          }} />
+          {/* Shine */}
+          <div style={{
+            position: 'absolute',
+            top: '10%',
+            left: '10%',
+            width: '35%',
+            height: '35%',
+            background: 'rgba(255,255,255,0.4)',
+            borderRadius: '50%',
+            filter: 'blur(8px)'
+          }} />
+        </motion.button>
+        <p style={{
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: '0.9rem',
+          marginTop: '10px',
+          fontWeight: 600
+        }}>Tap to Play</p>
+      </motion.div>
+
+      {/* Character Selection Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '12px',
+          padding: '10px 15px',
+          zIndex: 10
+        }}
+      >
+        {Object.values(CHARACTER_TYPES).map((char) => (
           <motion.button
-            className="start-button-modern"
-            onClick={handleStart}
-            whileHover={{ scale: 1.05 }}
+            key={char.id}
+            onClick={() => handleSelect(char.id)}
             whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            style={{
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: selectedCharacter === char.id ? `3px solid ${char.color}` : '3px solid rgba(255,255,255,0.1)',
+              background: selectedCharacter === char.id ? `${char.color}22` : 'rgba(255,255,255,0.05)',
+              color: '#ffffff',
+              fontSize: 'clamp(0.85rem, 3vw, 1rem)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: selectedCharacter === char.id ? `0 4px 20px ${char.color}44` : 'none'
+            }}
           >
-            <span className="button-text">Start Game</span>
-            <span className="button-arrow">→</span>
+            <span style={{ fontSize: '1.3em' }}>{char.icon}</span>
+            {char.title}
           </motion.button>
-        </motion.div>
-      </div>
+        ))}
+      </motion.div>
+
+      {/* IG Metall Benefits Info - Styled with glow */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '15px',
+          padding: '18px 24px',
+          paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+          margin: '10px 15px',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))',
+          borderRadius: '16px',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          boxShadow: '0 4px 24px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+          zIndex: 10
+        }}
+      >
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)',
+          flexShrink: 0
+        }}>
+          <span style={{ fontSize: '1.5rem' }}>🤝</span>
+        </div>
+        <div style={{ textAlign: 'left' }}>
+          <p style={{
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: '1rem',
+            margin: 0,
+            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+          }}>Run, collect benefits, avoid obstacles!</p>
+          <p style={{
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '0.8rem',
+            margin: '4px 0 0 0',
+            lineHeight: 1.3
+          }}>Discover what IG Metall membership offers you</p>
+        </div>
+      </motion.div>
     </div>
   )
 }
