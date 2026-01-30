@@ -69,53 +69,95 @@ function App() {
   const jumpSoundRef = useRef(null)
   const hurtSoundRef = useRef(null)
   const collectSoundRef = useRef(null)
+  const audioUnlockedRef = useRef(false)
 
-  // Initialize sounds
+  // Initialize and preload sounds for mobile
   useEffect(() => {
-    dashSoundRef.current = new Audio('/sounds/dash_sound.wav')
-    dashSoundRef.current.volume = 0.5
+    // Create audio elements with preload
+    const createAudio = (src, volume) => {
+      const audio = new Audio(src)
+      audio.preload = 'auto'
+      audio.volume = volume
+      // Force load the audio
+      audio.load()
+      return audio
+    }
 
-    jumpSoundRef.current = new Audio('/sounds/jump_sound.wav')
-    jumpSoundRef.current.volume = 0.5
+    dashSoundRef.current = createAudio('/sounds/dash_sound.wav', 0.5)
+    jumpSoundRef.current = createAudio('/sounds/jump_sound.wav', 0.5)
+    hurtSoundRef.current = createAudio('/sounds/hurt_sound.wav', 0.6)
+    collectSoundRef.current = createAudio('/sounds/collect_sound.wav', 0.5)
 
-    hurtSoundRef.current = new Audio('/sounds/hurt_sound.wav')
-    hurtSoundRef.current.volume = 0.6
+    // Unlock audio on first user interaction (required for mobile)
+    const unlockAudio = () => {
+      if (audioUnlockedRef.current) return
 
-    collectSoundRef.current = new Audio('/sounds/collect_sound.wav')
-    collectSoundRef.current.volume = 0.5
+      // Play and immediately pause all sounds to unlock them
+      const sounds = [dashSoundRef, jumpSoundRef, hurtSoundRef, collectSoundRef]
+      sounds.forEach(ref => {
+        if (ref.current) {
+          ref.current.play().then(() => {
+            ref.current.pause()
+            ref.current.currentTime = 0
+          }).catch(() => {})
+        }
+      })
+
+      audioUnlockedRef.current = true
+      // Remove listeners after unlock
+      document.removeEventListener('touchstart', unlockAudio)
+      document.removeEventListener('touchend', unlockAudio)
+      document.removeEventListener('click', unlockAudio)
+    }
+
+    document.addEventListener('touchstart', unlockAudio, { once: false })
+    document.addEventListener('touchend', unlockAudio, { once: false })
+    document.addEventListener('click', unlockAudio, { once: false })
+
+    return () => {
+      document.removeEventListener('touchstart', unlockAudio)
+      document.removeEventListener('touchend', unlockAudio)
+      document.removeEventListener('click', unlockAudio)
+    }
+  }, [])
+
+  // Optimized sound play function - clone node for better mobile performance
+  const playSound = useCallback((audioRef) => {
+    if (audioRef.current) {
+      try {
+        // Clone the audio node for overlapping sounds and better mobile performance
+        const clone = audioRef.current.cloneNode()
+        clone.volume = audioRef.current.volume
+        clone.play().catch(() => {})
+        // Clean up clone after it finishes
+        clone.onended = () => clone.remove()
+      } catch {
+        // Fallback to original method
+        audioRef.current.currentTime = 0
+        audioRef.current.play().catch(() => {})
+      }
+    }
   }, [])
 
   // Play dash sound function
   const playDashSound = useCallback(() => {
-    if (dashSoundRef.current) {
-      dashSoundRef.current.currentTime = 0
-      dashSoundRef.current.play().catch(() => {}) // Ignore errors if sound can't play
-    }
-  }, [])
+    playSound(dashSoundRef)
+  }, [playSound])
 
   // Play jump sound function
   const playJumpSound = useCallback(() => {
-    if (jumpSoundRef.current) {
-      jumpSoundRef.current.currentTime = 0
-      jumpSoundRef.current.play().catch(() => {})
-    }
-  }, [])
+    playSound(jumpSoundRef)
+  }, [playSound])
 
   // Play hurt sound function
   const playHurtSound = useCallback(() => {
-    if (hurtSoundRef.current) {
-      hurtSoundRef.current.currentTime = 0
-      hurtSoundRef.current.play().catch(() => {})
-    }
-  }, [])
+    playSound(hurtSoundRef)
+  }, [playSound])
 
   // Play collect sound function
   const playCollectSound = useCallback(() => {
-    if (collectSoundRef.current) {
-      collectSoundRef.current.currentTime = 0
-      collectSoundRef.current.play().catch(() => {})
-    }
-  }, [])
+    playSound(collectSoundRef)
+  }, [playSound])
 
   // Get lane X position in 3D space
   const getLanePosition = useCallback((lane) => {
