@@ -22,6 +22,9 @@ import Win from './components/Win'
 // Game data
 import { getRandomBenefit, getRandomObstacle, BENEFITS } from './config/gameData'
 
+// Confetti effect
+import Confetti from 'react-confetti'
+
 // Game constants
 const GAME_CONFIG = {
   LANES: 3,
@@ -442,10 +445,7 @@ function App() {
       // Update distance (slower increment)
       setDistance(prev => prev + speed * 10)
 
-      // Move finish line Z if active and only in playing state
-      if (gameState === 'playing' && finishLineActive && finishLineZ !== null) {
-        setFinishLineZ(z => z + speed * 10)
-      }
+      // Move finish line Z if active and only in playing state - REMOVED: now handled by separate smooth animation
 
       // Dynamic spawn interval - decreases as speed increases
       // At base speed (0.08): 1200ms, at max speed (0.30): ~600ms
@@ -466,6 +466,47 @@ function App() {
 
     return () => clearInterval(gameLoop)
   }, [gameState, speed, spawnItem, isExploding, finishLineActive, finishLineZ])
+
+  // Smooth finish line movement
+  useEffect(() => {
+    if (gameState !== 'playing' || !finishLineActive || finishLineZ === null) return
+
+    let animationFrameId
+    let lastTime = performance.now()
+
+    const moveFinishLine = (currentTime) => {
+      const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.05) // Cap delta to avoid huge jumps
+      lastTime = currentTime
+
+      setFinishLineZ(prevZ => {
+        if (prevZ === null) return null
+        const newZ = prevZ + speed * deltaTime * 10 // Move based on time delta
+        return newZ
+      })
+
+      animationFrameId = requestAnimationFrame(moveFinishLine)
+    }
+
+    animationFrameId = requestAnimationFrame(moveFinishLine)
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [gameState, finishLineActive, speed])
+
+  // === Finish Line Collision Detection ===
+  useEffect(() => {
+    if (gameState !== 'playing' || !finishLineActive || finishLineZ === null) return
+
+    // Check if player has crossed the finish line
+    if (finishLineZ >= -1) { // Player is at Z=0, finish line triggers when it reaches the player
+      setGameState('win')
+      setFinishLineActive(false)
+      setFinishLineZ(null)
+    }
+  }, [gameState, finishLineActive, finishLineZ])
 
   // After win/gameover/exploding, stop finish line updates
   useEffect(() => {
@@ -829,6 +870,20 @@ function App() {
             )}
         </Suspense>
       </Canvas>
+
+      {/* Render confetti in win state */}
+      {gameState === 'win' && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.2}
+          initialVelocityY={10}
+          tweenDuration={5000}
+          colors={['#ff0a0a', '#0aff0a', '#0a0aff', '#ffff0a']}
+        />
+      )}
     </motion.div>
     </>
     </ErrorBoundary>
