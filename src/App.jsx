@@ -441,8 +441,8 @@ function App() {
       // Update distance (slower increment)
       setDistance(prev => prev + speed * 10)
 
-      // Move finish line Z if active
-      if (finishLineActive && finishLineZ !== null) {
+      // Move finish line Z if active and only in playing state
+      if (gameState === 'playing' && finishLineActive && finishLineZ !== null) {
         setFinishLineZ(z => z + speed * 10)
       }
 
@@ -465,6 +465,14 @@ function App() {
 
     return () => clearInterval(gameLoop)
   }, [gameState, speed, spawnItem, isExploding, finishLineActive, finishLineZ])
+
+  // After win/gameover/exploding, stop finish line updates
+  useEffect(() => {
+    if (gameState === 'win' || gameState === 'gameover' || isExploding) {
+      setFinishLineActive(false)
+      setFinishLineZ(null)
+    }
+  }, [gameState, isExploding])
 
   // Reset game
   const resetGame = useCallback(() => {
